@@ -1,0 +1,136 @@
+C:.
+│   .gitignore
+│   Pacman game - final project.iml
+│
+├───.idea
+│       .gitignore
+│       misc.xml
+│       modules.xml
+│       uiDesigner.xml
+│       vcs.xml
+│       workspace.xml
+│
+├───out
+│   └───production
+│       └───Pacman game - final project
+│           │   ProjectStructure
+│           │
+│           ├───assets
+│           │   └───images
+│           │       │   Pacman_icon.png
+│           │       │
+│           │       ├───gameIcons
+│           │       │       hart.png
+│           │       │
+│           │       ├───pacman
+│           │       │       pacman_down1.png
+│           │       │       pacman_down2.png
+│           │       │       pacman_left1.png
+│           │       │       pacman_left2.png
+│           │       │       pacman_right1.png
+│           │       │       pacman_right2.png
+│           │       │       pacman_up1.png
+│           │       │       pacman_up2.png
+│           │       │
+│           │       └───walls
+│           │               blackWall.png
+│           │               blueWall.png
+│           │               redWall.png
+│           │               yellowWall.png
+│           │
+│           ├───entity's
+│           │       Entity.class
+│           │       Player.class
+│           │
+│           ├───main
+│           │       CollisionChecker.class
+│           │       GamePanel.class
+│           │       KeyEventsHandler.class
+│           │       Main.class
+│           │       Maps.class
+│           │
+│           └───tiles
+│                   Tile.class
+│                   TileManager.class
+│
+└───src
+    │   ProjectStructure
+    │
+    ├───assets
+    │   └───images
+    │       │   Pacman_icon.png
+    │       │
+    │       ├───gameIcons
+    │       │       hart.png
+    │       │
+    │       ├───ghosts
+    │       │   ├───blinky
+    │       │   │       down1.png
+    │       │   │       down2.png
+    │       │   │       left1.png
+    │       │   │       left2.png
+    │       │   │       right1.png
+    │       │   │       right2.png
+    │       │   │       up1.png
+    │       │   │       up2.png
+    │       │   │
+    │       │   ├───clyde
+    │       │   │       down1.png
+    │       │   │       down2.png
+    │       │   │       left1.png
+    │       │   │       left2.png
+    │       │   │       right1.png
+    │       │   │       right2.png
+    │       │   │       up1.png
+    │       │   │       up2.png
+    │       │   │
+    │       │   ├───inky
+    │       │   │       down1.png
+    │       │   │       down2.png
+    │       │   │       left1.png
+    │       │   │       left2.png
+    │       │   │       right1.png
+    │       │   │       right2.png
+    │       │   │       up1.png
+    │       │   │       up2.png
+    │       │   │
+    │       │   └───pinky
+    │       │           down1.png
+    │       │           down2.png
+    │       │           left1.png
+    │       │           left2.png
+    │       │           right1.png
+    │       │           right2.png
+    │       │           up1.png
+    │       │           up2.png
+    │       │
+    │       ├───pacman
+    │       │       pacman_down1.png
+    │       │       pacman_down2.png
+    │       │       pacman_left1.png
+    │       │       pacman_left2.png
+    │       │       pacman_right1.png
+    │       │       pacman_right2.png
+    │       │       pacman_up1.png
+    │       │       pacman_up2.png
+    │       │
+    │       └───walls
+    │               blackWall.png
+    │               blueWall.png
+    │               redWall.png
+    │               yellowWall.png
+    │
+    ├───entitys
+    │       Entity.java
+    │       Player.java
+    │
+    ├───main
+    │       CollisionChecker.java
+    │       GamePanel.java
+    │       KeyEventsHandler.java
+    │       Main.java
+    │       Maps.java
+    │
+    └───tiles
+            Tile.java
+            TileManager.java

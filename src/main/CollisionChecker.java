@@ -1,6 +1,7 @@
 package main;
 
 import entitys.Entity;
+import objects.ObjectManager;
 
 public class CollisionChecker {
     GamePanel gp;
@@ -67,5 +68,43 @@ public class CollisionChecker {
                 }
                 break;
         }
+    }
+
+    public void checkObject(Entity entity) {
+        int entityCol = entity.entityX / gp.tileSize;
+        int entityRow = entity.entityY / gp.tileSize;
+
+        // Check if the position is within bounds
+        if (entityCol >= 0 && entityCol < gp.maxScreenCol &&
+                entityRow >= 0 && entityRow < gp.maxScreenRow) {
+
+            String tile = ObjectManager.positions[entityRow][entityCol];
+            if (tile != null) {
+                // Pass row and col in the correct order
+                handleObjectCollision(tile, entityRow, entityCol);
+            }
+        }
+    }
+
+    public void handleObjectCollision(String objName, int row, int col) {
+        switch (objName) {
+            case "Coin":
+                System.out.println("coin collected at row:" + row + " col:" + col);
+                gp.playSE(1);
+                ObjectManager.positions[row][col] = null;
+                gp.player.points += 10;
+                break;
+        }
+    }
+
+    public boolean isTileBlocked(int col, int row) {
+        // Check bounds first
+        if (row < 0 || col < 0 || row >= gp.maxScreenRow || col >= gp.maxScreenCol) {
+            return true; // Consider out of bounds as blocked
+        }
+
+        // Get the tile number at the specified position
+        int tileNum = gp.tileManager.mapTileNum[row][col];
+        return gp.tileManager.tiles[tileNum].collision;
     }
 }

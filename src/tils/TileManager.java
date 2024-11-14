@@ -45,11 +45,13 @@ public class TileManager {
     }
 
     public void draw(Graphics2D g2) {
-        g2.setColor(Color.BLUE);
         for (int i = 0; i < Maps.map1.length; i++){
             for (int j = 0; j < Maps.map1[i].length; j++){
                 int tileNum = mapTileNum[j][i];
-                g2.drawImage(tiles[tileNum].image,i * gp.tileSize, j * gp.tileSize, gp.tileSize, gp.tileSize,null);
+                if (tileNum == 0)continue;
+                int col = i * gp.tileSize + gp.leftRightMargin;
+                int row = j * gp.tileSize + gp.topBottomMargin;
+                g2.drawImage(tiles[tileNum].image,col, row, gp.tileSize, gp.tileSize,null);
             }
         }
     }

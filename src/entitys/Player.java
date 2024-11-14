@@ -10,6 +10,10 @@ import java.io.File;
 import java.io.IOException;
 
 public class Player extends Entity {
+    public int points;
+    public int score;
+    public int level;
+
     GamePanel gp;
     KeyEventsHandler keyEH;
 
@@ -34,6 +38,10 @@ public class Player extends Entity {
         entityY = (gp.screenHeight / 4) * 3 + ((gp.tileSize / 4) * 3);
         speed = 4;
         direction = "right";
+
+        points = 0;
+        score = 0;
+        level = 1;
     }
 
     public void getPlayerImage() {
@@ -52,63 +60,119 @@ public class Player extends Entity {
         }
     }
 
-    public void update() {
-        // Check for key input and update the player's direction
-        if (keyEH.downPressed || keyEH.upPressed || keyEH.leftPressed || keyEH.rightPressed) {
-            if (keyEH.upPressed) direction = "up";
-            if (keyEH.downPressed) direction = "down";
-            if (keyEH.leftPressed) direction = "left";
-            if (keyEH.rightPressed) direction = "right";
 
-            // Check for collisions and update the player's position
-            collisionOn = false;
-            gp.collisionChecker.checkTile(this);
-            if (!collisionOn && !outOfScreen(direction)) {
-                switch (direction) {
-                    case "up":
-                        entityY -= speed;
-                        break;
-                    case "down":
-                        entityY += speed;
-                        break;
-                    case "left":
-                        entityX -= speed;
-                        break;
-                    case "right":
-                        entityX += speed;
-                        break;
-                }
+
+    public void update() {
+        // Check if this is the first move
+        boolean isFirstMove = !keyEH.upPressed && !keyEH.downPressed &&
+                !keyEH.leftPressed && !keyEH.rightPressed &&
+                direction.equals("right") &&
+                entityX == gp.screenWidth / 2 - (gp.tileSize / 2) &&
+                entityY == (gp.screenHeight / 4) * 3 + ((gp.tileSize / 4) * 3);
+
+        if (isFirstMove) {
+            return; // Don't move until player provides input
+        }
+
+        // Store the current direction before checking for new input
+        String previousDirection = direction;
+
+        // Check if any new direction is pressed
+        if (keyEH.upPressed && canMove("up")) {
+            direction = "up";
+        } else if (keyEH.downPressed && canMove("down")) {
+            direction = "down";
+        } else if (keyEH.leftPressed && canMove("left")) {
+            direction = "left";
+        } else if (keyEH.rightPressed && canMove("right")) {
+            direction = "right";
+        }
+
+        // If we can't move in the new direction, keep the previous direction
+        if (!canMove(direction)) {
+            direction = previousDirection;
+        }
+
+        // Continue moving in the current direction if possible
+        if (canMove(direction)) {
+            // Move according to direction
+            switch (direction) {
+                case "up":
+                    entityY -= speed;
+                    break;
+                case "down":
+                    entityY += speed;
+                    break;
+                case "left":
+                    entityX -= speed;
+                    // Handle screen wrapping for left side
+                    if (entityX + solidArea.x < 0) {
+                        entityX = gp.screenWidth - gp.tileSize;
+                    }
+                    break;
+                case "right":
+                    entityX += speed;
+                    // Handle screen wrapping for right side
+                    if (entityX + gp.tileSize > gp.screenWidth) {
+                        entityX = 0;
+                    }
+                    break;
             }
 
-            // Animation frame counter
+            snapToGrid(direction);
+
+            // Update animation frame
             frameCounter++;
             if (frameCounter > 5) {
-                if (positionNumber == 1) positionNumber = 2;
-                else if (positionNumber == 2) positionNumber = 1;
+                positionNumber = (positionNumber == 1) ? 2 : 1;
                 frameCounter = 0;
             }
         }
     }
 
-    // Check if the player is going off-screen and wrap around
-    boolean outOfScreen(String direction) {
+    private void snapToGrid(String direction) {
         switch (direction) {
+            case "up", "down":
+                entityX = Math.round((float)entityX / gp.tileSize) * gp.tileSize;
+                break;
+            case "right", "left":
+                entityY = Math.round((float)entityY / gp.tileSize) * gp.tileSize;
+                break;
+        }
+    }
+
+    // Helper method to check if movement in a direction is possible
+    private boolean canMove(String direction) {
+        // Save current position
+        int originalX = entityX;
+        int originalY = entityY;
+
+        // Temporarily update position to check collision
+        switch (direction) {
+            case "up":
+                entityY -= speed;
+                break;
+            case "down":
+                entityY += speed;
+                break;
             case "left":
-                if (entityX - speed < 0) {
-                    entityX = gp.screenWidth;
-                    return true;
-                }
+                entityX -= speed;
                 break;
             case "right":
-                if (entityX + speed > gp.screenWidth) {
-                    entityX = 0;
-                    return true;
-                }
+                entityX += speed;
                 break;
-            default:
-                return false;
         }
-        return false;
+
+        // Check collision
+        collisionOn = false;
+        gp.collisionChecker.checkTile(this);
+        gp.collisionChecker.checkObject(this);
+
+        // Restore original position
+        entityX = originalX;
+        entityY = originalY;
+
+        return !collisionOn;
     }
 
     public void draw(Graphics2D g2d) {
@@ -132,6 +196,8 @@ public class Player extends Entity {
                 if (positionNumber == 2) image = right2;
                 break;
         }
-        g2d.drawImage(image, entityX, entityY, gp.tileSize, gp.tileSize, null);
+        int col = entityX + gp.leftRightMargin;
+        int row = entityY + gp.topBottomMargin;
+        g2d.drawImage(image, col, row, gp.tileSize, gp.tileSize, null);
     }
 }

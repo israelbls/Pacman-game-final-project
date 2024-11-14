@@ -23,14 +23,12 @@ public class Main {
 
         // Create the GamePanel and add it to the window
         GamePanel panel = new GamePanel();
-        window.add(panel);
+        MenuPanel menu = new MenuPanel(panel,window);
+        window.add(menu);
         window.pack();
 
         // Center the window on the screen
         window.setLocationRelativeTo(null);
         window.setVisible(true);
-
-        // Start the game thread
-        panel.startGameThread();
     }
 }
