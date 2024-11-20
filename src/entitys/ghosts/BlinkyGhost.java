@@ -18,7 +18,7 @@ public class BlinkyGhost extends Ghost {
         speed = 2;
         direction = "right";
 
-
+        eatenModeTarget = new Point(entityX, entityY);
         state = "Scatter";
         scatterModeTarget = new Point((gp.maxScreenRow - 2) * gp.tileSize, 2 * gp.tileSize);
         target = scatterModeTarget;

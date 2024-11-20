@@ -17,6 +17,7 @@ public class PinkyGhost extends Ghost {
         speed = 2;
         direction = "down";
 
+        eatenModeTarget = new Point(entityX, entityY);
         state = "Scatter";
         scatterModeTarget = new Point(2 * gp.tileSize, 2 * gp.tileSize);
         target = scatterModeTarget;

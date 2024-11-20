@@ -19,6 +19,7 @@ public class ClydeGhost extends Ghost {
 
         state = "Scatter";
         scatterModeTarget = new Point(2 * gp.tileSize, (gp.maxScreenCol - 2) * gp.tileSize);
+        eatenModeTarget = new Point(entityX, entityY);
         target = scatterModeTarget;
     }
 

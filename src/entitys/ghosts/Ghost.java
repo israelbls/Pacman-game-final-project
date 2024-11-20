@@ -10,17 +10,27 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public abstract class Ghost extends Entity {
-    protected GamePanel gp;
+    public GamePanel gp;
+    protected int modeTimer = 600;
+    public int timeCounter = 0;
+    int frightenedPos = 1;
     protected String ghostName;
+    public BufferedImage eatenUp;
+    BufferedImage eatenDown;
+    BufferedImage eatenLeft;
+    BufferedImage eatenRight;
+    public BufferedImage frighten1;
+    BufferedImage frighten2;
 
     protected Point target;
-    protected Point scatterModeTarget;
+    public Point scatterModeTarget;
     protected Point eatenModeTarget;
 
-    protected String state;
+    public String state;
 
     public Ghost(GamePanel gp, String ghostName) {
         this.gp = gp;
@@ -40,8 +50,14 @@ public abstract class Ghost extends Entity {
 
     protected abstract Point getChaseModeTarget();
 
+    public void resetPosition() {
+        setDefaultValues();
+        state = "Scatter";  // Reset to default state
+        timeCounter = 0;    // Reset timer
+        modeTimer = 600;    // Reset mode timer
+    }
 
-    protected void getGhostImage() {
+    public void getGhostImage() {
         try {
             up1 = ImageIO.read(new File("src/assets/images/ghosts/" + ghostName + "/up1.png"));
             up2 = ImageIO.read(new File("src/assets/images/ghosts/" + ghostName + "/up2.png"));
@@ -51,13 +67,23 @@ public abstract class Ghost extends Entity {
             right2 = ImageIO.read(new File("src/assets/images/ghosts/" + ghostName + "/right2.png"));
             left1 = ImageIO.read(new File("src/assets/images/ghosts/" + ghostName + "/left1.png"));
             left2 = ImageIO.read(new File("src/assets/images/ghosts/" + ghostName + "/left2.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            eatenUp = ImageIO.read(new File("src/assets/images/ghosts/eatan/up.png"));
+            eatenDown = ImageIO.read(new File("src/assets/images/ghosts/eatan/down.png"));
+            eatenLeft = ImageIO.read(new File("src/assets/images/ghosts/eatan/left.png"));
+            eatenRight = ImageIO.read(new File("src/assets/images/ghosts/eatan/right.png"));
+
+            frighten1 = ImageIO.read(new File("src/assets/images/ghosts/frightened/f1.png"));
+            frighten2 = ImageIO.read(new File("src/assets/images/ghosts/frightened/f2.png"));
+        } catch (IOException _) {
+            System.out.println("error loading ghost image");
         }
     }
 
 
     public void update() {
+        modeControl();
+
         // First get the new direction based on current state and target
         String newDirection = getDirection();
 
@@ -91,13 +117,15 @@ public abstract class Ghost extends Entity {
 
         // Animation frame counter
         frameCounter++;
-        if (frameCounter > 5) {
+        if (frameCounter % 5 == 0) {
             positionNumber = positionNumber == 1 ? 2 : 1;
+        } else if (frameCounter > 30) {
+            frightenedPos = frightenedPos == 1 ? 2 : 1;
             frameCounter = 0;
         }
     }
 
-    protected void enterMode(String mode) {
+    public void enterMode(String mode) {
         state = mode;
         direction = getOppositeDirection(direction);
     }
@@ -122,12 +150,48 @@ public abstract class Ghost extends Entity {
         target = getTarget();
         return switch (state) {
             case "Scatter", "Chase", "Eaten" -> bestDirection(target, availableDirections);
-            case "Frightened" -> availableDirections[random.nextInt(availableDirections.length)];
+            case "Frightened" -> isPlayback() ? playbackMode()
+                    : availableDirections[random.nextInt(availableDirections.length)];
             default -> "";
         };
     }
 
-    private boolean isSnappedToGrid() {
+    private String playbackMode() {
+        String frame = gp.gameRecorder.getCurrentFrame(gp.frameCounter);
+        String recordedDirection = switch (ghostName) {
+            case "blinky" -> frame.split("\\|")[1];
+            case "pinky" -> frame.split("\\|")[2];
+            case "inky" -> frame.split("\\|")[3];
+            case "clyde" -> frame.split("\\|")[4];
+            default -> null;
+        };
+        
+        // If recorded direction is NA or null, use default behavior
+        if (recordedDirection == null || recordedDirection.equals("NA")) {
+            String[] availableDirections = getAvailableDirections(direction);
+            if (availableDirections.length == 0) return direction;
+            Random random = new Random();
+            return availableDirections[random.nextInt(availableDirections.length)];
+        }
+        
+        // Check if recorded direction is available
+        String[] availableDirections = getAvailableDirections(direction);
+        for (String dir : availableDirections) {
+            if (dir.equals(recordedDirection)) {
+                return recordedDirection;
+            }
+        }
+        
+        // If recorded direction is not available, use default behavior
+        if (availableDirections.length == 0) return direction;
+        Random random = new Random();
+        return availableDirections[random.nextInt(availableDirections.length)];
+    }
+
+    public boolean isSnappedToGrid() {
+        if (Objects.equals(direction, "NA")) {
+            return false;
+        }
         return switch (direction) {
             case "up", "down" -> entityY % gp.tileSize == 0;
             case "left", "right" -> entityX % gp.tileSize == 0;
@@ -182,26 +246,68 @@ public abstract class Ghost extends Entity {
         };
     }
 
+    public void modeControl() {
+        timeCounter++;
+        if (timeCounter > modeTimer) {
+            timeCounter = 0;
+            if (state.equals("Frightened")) enterMode("Scatter");
+            if (state.equals("Scatter")) enterMode("Chase");
+            else enterMode("Scatter");
+        }
+
+        if (gp.collisionChecker.ghostHitsPlayer(this)) {
+            System.out.println("ghost hits: " + ghostName);
+            switch (state) {
+                case "Scatter", "Chase":
+                    if (!gp.player.dead) gp.player.life--;
+                    gp.player.dead = true;
+                    gp.ghostsManager.resetAllGhosts();  // Reset all ghosts, not just this one
+                    if (gp.player.life == 0) gp.player.gameOver = true;
+                    break;
+                case "Frightened":
+                    gp.player.points += 200;
+                    enterMode("Eaten");
+                case "Eaten":
+                    break;
+            }
+        }
+
+        if (state.equals("Eaten") && gp.collisionChecker.ghostHitsHome(this, eatenModeTarget)) {
+            enterMode("Scatter");
+        }
+    }
 
     public void draw(Graphics2D g2d) {
         BufferedImage image = null;
-        switch (direction) {
-            case "up":
-                image = positionNumber == 1 ? up1 : up2;
-                break;
-            case "down":
-                image = positionNumber == 1 ? down1 : down2;
-                break;
-            case "left":
-                image = positionNumber == 1 ? left1 : left2;
-                break;
-            case "right":
-                image = positionNumber == 1 ? right1 : right2;
-                break;
-        }
+        image = switch (state) {
+
+            case "Scatter", "Chase" -> switch (direction) {
+                case "up" -> positionNumber == 1 ? up1 : up2;
+                case "down" -> positionNumber == 1 ? down1 : down2;
+                case "left" -> positionNumber == 1 ? left1 : left2;
+                case "right" -> positionNumber == 1 ? right1 : right2;
+                default -> null;
+            };
+
+            case "Frightened" -> frightenedPos == 1 ? frighten1 : frighten2;
+
+            case "Eaten" -> switch (direction) {
+                case "up" -> eatenUp;
+                case "down" -> eatenDown;
+                case "left" -> eatenLeft;
+                case "right" -> eatenRight;
+                default -> null;
+            };
+
+            default -> null;
+        };
 
         int screenX = entityX + gp.leftRightMargin;
         int screenY = entityY + gp.topBottomMargin;
         g2d.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
+    }
+
+    private boolean isPlayback() {
+        return gp.inPlayBackMode;
     }
 }

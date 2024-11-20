@@ -1,13 +1,19 @@
 package main;
 
 import entitys.Entity;
+import entitys.ghosts.GhostsManager;
 import objects.ObjectManager;
+
+import java.awt.*;
+import java.awt.Point;
 
 public class CollisionChecker {
     GamePanel gp;
+    int coins;
 
     public CollisionChecker(GamePanel gp) {
         this.gp = gp;
+        this.coins = gp.objectManager.coins.coins;
     }
 
     public void checkTile(Entity entity) {
@@ -70,7 +76,7 @@ public class CollisionChecker {
         }
     }
 
-    public void checkObject(Entity entity) {
+    public void checkObject(Entity entity, String[][] positions) {
         int entityCol = entity.entityX / gp.tileSize;
         int entityRow = entity.entityY / gp.tileSize;
 
@@ -78,21 +84,64 @@ public class CollisionChecker {
         if (entityCol >= 0 && entityCol < gp.maxScreenCol &&
                 entityRow >= 0 && entityRow < gp.maxScreenRow) {
 
-            String tile = ObjectManager.positions[entityRow][entityCol];
+            String tile = positions[entityRow][entityCol];
             if (tile != null) {
                 // Pass row and col in the correct order
-                handleObjectCollision(tile, entityRow, entityCol);
+                handleObjectCollision(tile, entityRow, entityCol, positions);
             }
         }
     }
 
-    public void handleObjectCollision(String objName, int row, int col) {
+    public void handleObjectCollision(String objName, int row, int col, String[][] positions) {
         switch (objName) {
             case "Coin":
                 System.out.println("coin collected at row:" + row + " col:" + col);
                 gp.playSE(1);
-                ObjectManager.positions[row][col] = null;
+                positions[row][col] = null;
                 gp.player.points += 10;
+                coins--;
+                if (coins == 0) gp.player.win = true;
+                break;
+            case "Cherry":
+                System.out.println("Cherry collected at row:" + row + " col:" + col);
+                gp.playSE(1);
+                positions[row][col] = null;
+                gp.player.points += 100;
+                gp.objectManager.fruit.deleteFruit(gp.objectManager.fruit.getFruitIndex("Cherry"));
+                break;
+            case "Strawberry":
+                System.out.println("Strawberry collected at row:" + row + " col:" + col);
+                gp.playSE(1);
+                positions[row][col] = null;
+                gp.player.points += 300;
+                gp.objectManager.fruit.deleteFruit(gp.objectManager.fruit.getFruitIndex("Strawberry"));
+                break;
+            case "Apple":
+                System.out.println("Apple collected at row:" + row + " col:" + col);
+                gp.playSE(1);
+                positions[row][col] = null;
+                gp.player.points += 500;
+                gp.objectManager.fruit.deleteFruit(gp.objectManager.fruit.getFruitIndex("Apple"));
+                break;
+            case "Lemon":
+                System.out.println("Lemon collected at row:" + row + " col:" + col);
+                gp.playSE(1);
+                positions[row][col] = null;
+                gp.player.points += 700;
+                gp.objectManager.fruit.deleteFruit(gp.objectManager.fruit.getFruitIndex("Lemon"));
+                break;
+            case "Grapes":
+                System.out.println("Grapes collected at row:" + row + " col:" + col);
+                gp.playSE(1);
+                positions[row][col] = null;
+                gp.player.points += 1000;
+                gp.objectManager.fruit.deleteFruit(gp.objectManager.fruit.getFruitIndex("Grapes"));
+                break;
+            case "PowerPellets":
+                System.out.println("powerPellets collected at row:" + row + " col:" + col);
+                positions[row][col] = null;
+                gp.player.points += 100;
+                gp.ghostsManager.frightened();
                 break;
         }
     }
@@ -106,5 +155,35 @@ public class CollisionChecker {
         // Get the tile number at the specified position
         int tileNum = gp.tileManager.mapTileNum[row][col];
         return gp.tileManager.tiles[tileNum].collision;
+    }
+
+    public boolean ghostHitsPlayer(Entity ghost) {
+        int playerLeftX = gp.player.entityX;
+        int playerRightX = gp.player.entityX + gp.player.solidArea.width;
+        int playerTopY = gp.player.entityY;
+        int playerBottomY = gp.player.entityY + gp.player.solidArea.height;
+
+        int ghostLeftX = ghost.entityX;
+        int ghostRightX = ghost.entityX + ghost.solidArea.width;
+        int ghostTopY = ghost.entityY;
+        int ghostBottomY = ghost.entityY + ghost.solidArea.height;
+
+        return playerLeftX < ghostRightX && playerRightX > ghostLeftX
+                && playerTopY < ghostBottomY && playerBottomY > ghostTopY;
+    }
+
+    public boolean ghostHitsHome(Entity ghost, Point home) {
+        int ghostLeftX = ghost.entityX;
+        int ghostRightX = ghost.entityX + ghost.solidArea.width;
+        int ghostTopY = ghost.entityY;
+        int ghostBottomY = ghost.entityY + ghost.solidArea.height;
+
+        int homeLeftX = home.x;
+        int homeRightX = home.x + gp.tileSize;
+        int homeTopY = home.y;
+        int homeBottomY = home.y + gp.tileSize;
+
+        return homeLeftX < ghostRightX && homeRightX > ghostLeftX
+                && homeTopY < ghostBottomY && homeBottomY > ghostTopY;
     }
 }

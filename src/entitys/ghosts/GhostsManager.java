@@ -3,40 +3,44 @@ package entitys.ghosts;
 import main.GamePanel;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GhostsManager {
-    GamePanel gp;
-    BlinkyGhost blinky;
-    PinkyGhost pinky;
-    InkyGhost inky;
-    ClydeGhost clyde;
+    private GamePanel gp;
+    public final List<Ghost> ghosts;
 
     public GhostsManager(GamePanel gp) {
         this.gp = gp;
-        blinky = new BlinkyGhost(gp);
-        pinky = new PinkyGhost(gp);
-        inky = new InkyGhost(gp,this.blinky);
-        clyde = new ClydeGhost(gp);
-
-        chase();
+        ghosts = new ArrayList<>();
+        ghosts.add(new BlinkyGhost(gp));
+        ghosts.add(new PinkyGhost(gp));
+        ghosts.add(new InkyGhost(gp, (BlinkyGhost) ghosts.getFirst()));
+        ghosts.add(new ClydeGhost(gp));
     }
 
     public void update() {
-        blinky.update();
-        pinky.update();
-        inky.update();
-        clyde.update();
+        for (Ghost ghost : ghosts) {
+            ghost.update();
+        }
     }
 
-    public void chase(){
-        blinky.enterMode("Chase");
-        inky.enterMode("Chase");
+    public void frightened() {
+        for (Ghost ghost : ghosts) {
+            ghost.enterMode("Frightened");
+            ghost.timeCounter = 0;
+        }
     }
 
     public void draw(Graphics2D g2d) {
-        blinky.draw(g2d);
-        pinky.draw(g2d);
-        inky.draw(g2d);
-        clyde.draw(g2d);
+        for (Ghost ghost : ghosts) {
+            ghost.draw(g2d);
+        }
+    }
+
+    public void resetAllGhosts() {
+        for (Ghost ghost : ghosts) {
+            ghost.resetPosition();
+        }
     }
 }

@@ -12,4 +12,6 @@ public class Entity {
     public int positionNumber = 1;
     public Rectangle solidArea;
     public boolean collisionOn = false;
+
+
 }
