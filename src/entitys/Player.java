@@ -1,8 +1,10 @@
 package entitys;
 
-import main.GamePanel;
+import entitys.ghosts.Ghost;
+import main.panels.GamePanel;
 import main.KeyEventsHandler;
-import main.MenuPanel;
+import main.HighScoreManager;
+import objects.ObjectManager;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -11,58 +13,77 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
-import java.util.Scanner;
 
+/**
+ * Represents the player-controlled Pacman character in the game.
+ * Handles player movement, animation, collision detection, scoring,
+ * and game state management.
+ */
 public class Player extends Entity {
+    // Death animation resources
     private final List<BufferedImage> death = new ArrayList<>();
     private int deathAnimationFrame = 0;
     private int deathAnimationCounter = 0;
-    private static final int DEATH_ANIMATION_DELAY = 3;  // At 60 FPS, this means ~20 frames per second for death animation
+    private static final int DEATH_ANIMATION_DELAY = 3;  // At 60 FPS, ~20 frames per second
 
-    public int points;
-    public int score;
-    public int level;
-    public int life;
+    // Game state variables
+    public int points;  // Current game points
+    public int score;   // High score
+    public int level;   // Current game level
+    public int life;    // Remaining lives
 
+    // Player state flags
     public boolean dead;
     public boolean isPlayingDeathAnimation;
-
     public boolean gameOver = false;
     public boolean win = false;
 
-
+    // Game components
+    private HighScoreManager highScoreManager;
     GamePanel gp;
     KeyEventsHandler keyEH;
 
+    /**
+     * Constructs a new Player instance.
+     * Initializes player properties, loads resources, and sets up collision detection.
+     *
+     * @param gp The GamePanel instance
+     * @param keyEH The key event handler for player input
+     * @throws IOException If there's an error loading player resources
+     */
     public Player(GamePanel gp, KeyEventsHandler keyEH) throws IOException {
         this.gp = gp;
         this.keyEH = keyEH;
+        this.score = getHighScore();
+        this.highScoreManager = new HighScoreManager();
 
         // Set the player's solid area (collision box)
         solidArea = new Rectangle();
         solidArea.x = 5;
         solidArea.y = 5;
-        solidArea.height = 22;
-        solidArea.width = 22;
+        solidArea.height = 14;
+        solidArea.width = 14;
 
         points = 0;
-        score = getHighScore();
         level = 1;
-        life = 6;
+        life = 3;
 
         setDefaultValues();
         getPlayerImage();
         loadDeathImages();
     }
 
+    /**
+     * Sets default values for player position and state.
+     * Called at game start and after death.
+     */
     public void setDefaultValues() {
-        // Set the player's initial position and speed
-        entityX = gp.screenWidth / 2 - (gp.tileSize / 2);
-        entityY = (gp.screenHeight / 4) * 3 + ((gp.tileSize / 4) * 3);
-        speed = 4;
+        entityX = 12 * gp.tileSize;
+        entityY = 21 * gp.tileSize;
+        speed = 3;
         direction = "right";
 
         dead = false;
@@ -71,7 +92,10 @@ public class Player extends Entity {
         deathAnimationCounter = 0;
     }
 
-    private void loadDeathImages() throws IOException {
+    /**
+     * Loads death animation frames from resources.
+     */
+    private void loadDeathImages() {
         for (int i = 0; i < 26; i++) {
             BufferedImage image = null;
             try {
@@ -83,26 +107,33 @@ public class Player extends Entity {
         }
     }
 
+    /**
+     * Loads player animation sprites for different directions.
+     */
     public void getPlayerImage() {
         try {
-            // Load the player's animation images
-            up1 = ImageIO.read(new File("C:/Users/User/IdeaProjects/Pacman game - final project/src/assets/images/pacman/pacman_up1.png"));
-            up2 = ImageIO.read(new File("C:/Users/User/IdeaProjects/Pacman game - final project/src/assets/images/pacman/pacman_up2.png"));
-            down1 = ImageIO.read(new File("C:/Users/User/IdeaProjects/Pacman game - final project/src/assets/images/pacman/pacman_down1.png"));
-            down2 = ImageIO.read(new File("C:/Users/User/IdeaProjects/Pacman game - final project/src/assets/images/pacman/pacman_down2.png"));
-            right1 = ImageIO.read(new File("C:/Users/User/IdeaProjects/Pacman game - final project/src/assets/images/pacman/pacman_right1.png"));
-            right2 = ImageIO.read(new File("C:/Users/User/IdeaProjects/Pacman game - final project/src/assets/images/pacman/pacman_right2.png"));
-            left1 = ImageIO.read(new File("C:/Users/User/IdeaProjects/Pacman game - final project/src/assets/images/pacman/pacman_left1.png"));
-            left2 = ImageIO.read(new File("C:/Users/User/IdeaProjects/Pacman game - final project/src/assets/images/pacman/pacman_left2.png"));
+            up1 = ImageIO.read(new File("src/assets/images/pacman/pacman_up1.png"));
+            up2 = ImageIO.read(new File("src/assets/images/pacman/pacman_up2.png"));
+            down1 = ImageIO.read(new File("src/assets/images/pacman/pacman_down1.png"));
+            down2 = ImageIO.read(new File("src/assets/images/pacman/pacman_down2.png"));
+            right1 = ImageIO.read(new File("src/assets/images/pacman/pacman_right1.png"));
+            right2 = ImageIO.read(new File("src/assets/images/pacman/pacman_right2.png"));
+            left1 = ImageIO.read(new File("src/assets/images/pacman/pacman_left1.png"));
+            left2 = ImageIO.read(new File("src/assets/images/pacman/pacman_left2.png"));
         } catch (IOException _) {
             System.out.println("Error loading images");
         }
     }
 
-
+    /**
+     * Updates player state, handles movement, collisions, and animations.
+     * Called every frame during game loop.
+     *
+     * @throws IOException If there's an error during playback mode
+     */
     public void update() throws IOException {
-        if (win) win();
-        if (gameOver) lose();
+        if (win && !gp.inPlayBackMode) win();
+        if (gameOver && !gp.inPlayBackMode) lose();
         if (dead) {
             if (!isPlayingDeathAnimation) {
                 // Start death animation
@@ -115,24 +146,23 @@ public class Player extends Entity {
             return;
         }
 
-        // Store the current direction before checking for new input
         String previousDirection = direction;
 
-        if (gp.inPlayBackMode){
-            getDirectionInPlayBackMode(gp.gameRecorder.getCurrentFrame(gp.frameCounter));
-        }else {
+        if (gp.inPlayBackMode) {
+            getDirectionInPlayBackMode();
+        } else {
             // Check if this is the first move
             boolean isFirstMove = !keyEH.upPressed && !keyEH.downPressed &&
                     !keyEH.leftPressed && !keyEH.rightPressed &&
                     direction.equals("right") &&
-                    entityX == gp.screenWidth / 2 - (gp.tileSize / 2) &&
-                    entityY == gp.screenHeight * 0.75 + (gp.tileSize * 0.75);
+                    entityX == 12 * gp.tileSize &&
+                    entityY == 21 * gp.tileSize;
 
             if (isFirstMove) {
                 return; // Don't move until player provides input
             }
 
-            // Check if any new direction is pressed
+            // Handle direction changes based on input
             if (keyEH.upPressed && canMove("up")) {
                 direction = "up";
             } else if (keyEH.downPressed && canMove("down")) {
@@ -142,27 +172,29 @@ public class Player extends Entity {
             } else if (keyEH.rightPressed && canMove("right")) {
                 direction = "right";
             }
-
         }
 
-        // If we can't move in the new direction, keep the previous direction
+        // Maintain previous direction if new direction is blocked
         if (!canMove(direction)) {
             direction = previousDirection;
         }
 
-        // Continue moving in the current direction if possible
+        // Move player if path is clear
         if (canMove(direction)) {
-            // Move according to direction
-            updateLocation();
+            if (gp.inPlayBackMode) {
+                updateLocationInPlayBackMode();
+            } else {
+                updateLocation();
+            }
 
             snapToGrid(direction);
 
-            // Check for collisions with coins, power pellets, and fruits
+            // Check collisions with game objects
             gp.collisionChecker.checkObject(this, gp.objectManager.coins.positions);
             gp.collisionChecker.checkObject(this, gp.objectManager.powerPellets.positions);
             gp.collisionChecker.checkObject(this, gp.objectManager.fruit.positions);
 
-            // Update animation frame
+            // Update animation
             frameCounter++;
             if (frameCounter > 5) {
                 positionNumber = (positionNumber == 1) ? 2 : 1;
@@ -171,6 +203,10 @@ public class Player extends Entity {
         }
     }
 
+    /**
+     * Updates player position based on current direction.
+     * Handles screen wrapping when player moves off-screen.
+     */
     public void updateLocation() {
         switch (direction) {
             case "up":
@@ -181,14 +217,12 @@ public class Player extends Entity {
                 break;
             case "left":
                 entityX -= speed;
-                // Handle screen wrapping for left side
                 if (entityX + solidArea.x < 0) {
                     entityX = gp.screenWidth - gp.tileSize;
                 }
                 break;
             case "right":
                 entityX += speed;
-                // Handle screen wrapping for right side
                 if (entityX + gp.tileSize > gp.screenWidth) {
                     entityX = 0;
                 }
@@ -196,6 +230,35 @@ public class Player extends Entity {
         }
     }
 
+    /**
+     * Gets player data from current frame during playback mode.
+     */
+    private String playerTab() throws IOException {
+        return gp.gameRecorder.getCurrentFrame(gp.frameCounter).split("\\|")[0];
+    }
+
+    /**
+     * Updates player location during playback mode.
+     */
+    private void updateLocationInPlayBackMode() throws IOException {
+        String position = playerTab().split("@")[1];
+        entityX = Integer.parseInt(position.split("#")[0]);
+        entityY = Integer.parseInt(position.split("#")[1]);
+    }
+
+    /**
+     * Updates player direction during playback mode.
+     */
+    public void getDirectionInPlayBackMode() throws IOException {
+        this.direction = playerTab().split("@")[0];
+    }
+
+    /**
+     * Aligns player position to grid based on movement direction.
+     * Ensures smooth movement along grid lines.
+     *
+     * @param direction Current movement direction
+     */
     private void snapToGrid(String direction) {
         switch (direction) {
             case "up", "down":
@@ -207,13 +270,18 @@ public class Player extends Entity {
         }
     }
 
-    // Helper method to check if movement in a direction is possible
-    private boolean canMove(String direction) {
-        // Save current position
+    /**
+     * Checks if movement in a specific direction is possible.
+     * Performs collision detection with walls and objects.
+     *
+     * @param direction Direction to check
+     * @return true if movement is possible, false otherwise
+     */
+    private boolean canMove(String direction) throws IOException {
         int originalX = entityX;
         int originalY = entityY;
 
-        // Temporarily update position to check collision
+        // Test movement
         switch (direction) {
             case "up":
                 entityY -= speed;
@@ -229,51 +297,50 @@ public class Player extends Entity {
                 break;
         }
 
-        // Check collision
+        // Check collisions
         collisionOn = false;
         gp.collisionChecker.checkTile(this);
-
         gp.collisionChecker.checkObject(this, gp.objectManager.coins.positions);
         gp.collisionChecker.checkObject(this, gp.objectManager.powerPellets.positions);
 
-
-        // Restore original position
+        // Restore position
         entityX = originalX;
         entityY = originalY;
 
         return !collisionOn;
     }
 
+    /**
+     * Updates death animation state.
+     * Controls animation timing and frame progression.
+     */
     private void updateDeathAnimation() {
         deathAnimationCounter++;
         if (deathAnimationCounter >= DEATH_ANIMATION_DELAY) {
             deathAnimationCounter = 0;
             deathAnimationFrame++;
 
-            // Check if animation is complete
             if (deathAnimationFrame >= death.size()) {
-                // Reset animation
                 isPlayingDeathAnimation = false;
                 dead = false;
                 deathAnimationFrame = 0;
                 deathAnimationCounter = 0;
-
-                // Reset player position
                 setDefaultValues();
             }
         }
     }
 
-    public void getDirectionInPlayBackMode(String frame){
-        this.direction = frame.split("\\|")[0];
-    }
-
+    /**
+     * Draws the player's sprite based on the current direction and animation frame.
+     *
+     * @param g2d The Graphics2D object for rendering
+     */
     public void draw(Graphics2D g2d) {
         if (dead && isPlayingDeathAnimation) {
             drawDeathAnimation(g2d);
             return;
         }
-        // Draw the player's sprite based on the current direction and animation frame
+
         BufferedImage image = null;
         switch (direction) {
             case "up":
@@ -298,6 +365,11 @@ public class Player extends Entity {
         g2d.drawImage(image, col, row, gp.tileSize, gp.tileSize, null);
     }
 
+    /**
+     * Draws the death animation.
+     *
+     * @param g2d The Graphics2D object for rendering
+     */
     private void drawDeathAnimation(Graphics2D g2d) {
         if (deathAnimationFrame < death.size()) {
             BufferedImage currentFrame = death.get(deathAnimationFrame);
@@ -311,19 +383,45 @@ public class Player extends Entity {
         }
     }
 
-    public void handleHighScore() throws IOException {
+    /**
+     * Handles high score management.
+     * Updates high score if current score is higher.
+     */
+    public void handleHighScore() {
         if (points > getHighScore()) {
             saveHighScore(points);
         }
+
+        String playerName = JOptionPane.showInputDialog(null,
+                "Enter your name for the high score:",
+                "New High Score!",
+                JOptionPane.PLAIN_MESSAGE);
+
+        if (playerName != null && !playerName.trim().isEmpty()) {
+            long gameDuration = gp.frameCounter / 60; // Convert from frames to seconds
+            highScoreManager.addScore(playerName.trim(), points, LocalDateTime.now(), gameDuration);
+        }
     }
 
+    /**
+     * Displays a game end message.
+     *
+     * @param title The message title
+     * @param message The message content
+     */
     private void showGameEndMessage(String title, String message) {
         try {
             Thread.sleep(1000);
-        } catch (InterruptedException _) {}
+        } catch (InterruptedException _) {
+        }
         JOptionPane.showMessageDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE);
     }
 
+    /**
+     * Sets the game end state.
+     *
+     * @param isWin true if the game is won, false otherwise
+     */
     public void setGameEndState(boolean isWin) {
         gameOver = true;
         win = isWin;
@@ -331,28 +429,53 @@ public class Player extends Entity {
         gp.stopMusic();
     }
 
+    /**
+     * Handles game win logic.
+     */
     void win() throws IOException {
         setGameEndState(true);
         gp.playSE(1);
         handleHighScore();
         showGameEndMessage("Victory!", "YOU WIN!\nFinal Score: " + points);
-        if (points > score)showGameEndMessage("High Score" , "HIGH SCORE!\nFinal Score: " + points);
-        SwingUtilities.invokeLater(gp::returnToMenu);
+        if (points > score) showGameEndMessage("High Score", "HIGH SCORE!\nFinal Score: " + points);
+        gp.returnToMenu();
     }
 
+    /**
+     * Advances to the next game level.
+     */
+    public void nextLevel() throws IOException {
+        if (level == 3) {
+            win = true;
+            return;
+        }
+        level++;
+        life++;
+        gp.setBackground(level == 2 ? Color.BLUE : Color.RED);
+        setDefaultValues();
+        for (Ghost ghost : gp.ghostsManager.ghosts) {
+            ghost.resetPosition();
+            ghost.speed++;
+        }
+        gp.objectManager = new ObjectManager(gp);
+    }
+
+    /**
+     * Handles game loss logic.
+     */
     void lose() throws IOException {
         setGameEndState(false);
         handleHighScore();
         showGameEndMessage("Game Over", "GAME OVER!\nFinal Score: " + points);
-        if (points > score)showGameEndMessage("High Score" , "HIGH SCORE!\nFinal Score: " + points);
-        SwingUtilities.invokeLater(gp::returnToMenu);
+        if (points > score) showGameEndMessage("High Score", "HIGH SCORE!\nFinal Score: " + points);
+        gp.returnToMenu();
     }
 
-    private void returnToMenu() throws IOException {
-        // Use GamePanel's returnToMenu method
-        SwingUtilities.invokeLater(() -> gp.returnToMenu());
-    }
-
+    /**
+     * Retrieves the current high score.
+     *
+     * @return The high score value
+     */
     public int getHighScore() {
         try {
             File file = new File("high_score.txt");
@@ -365,6 +488,11 @@ public class Player extends Entity {
         }
     }
 
+    /**
+     * Saves the high score to file.
+     *
+     * @param score The new high score value
+     */
     private void saveHighScore(int score) {
         try {
             FileWriter writer = new FileWriter("high_score.txt");

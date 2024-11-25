@@ -1,6 +1,6 @@
 package entitys.ghosts;
 
-import main.GamePanel;
+import main.panels.GamePanel;
 
 import java.awt.*;
 
@@ -14,15 +14,14 @@ public class InkyGhost extends Ghost {
 
     @Override
     protected void setDefaultValues() {
-        entityX = gp.tileSize * 10;
-        entityY = gp.tileSize * 9;
-        speed = 2;
+        entityX = gp.tileSize * 13;
+        entityY = gp.tileSize * 10;
+        speed = 1;
         direction = "left";
 
         state = "Scatter";
         scatterModeTarget = new Point((gp.maxScreenRow - 2) * gp.tileSize, (gp.maxScreenCol - 2) * gp.tileSize);
-        eatenModeTarget = new Point(entityX, entityY);
-        target = scatterModeTarget;
+        target = eatenModeTarget;
     }
 
     @Override

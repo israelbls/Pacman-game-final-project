@@ -1,6 +1,6 @@
 package entitys.ghosts;
 
-import main.GamePanel;
+import main.panels.GamePanel;
 
 import java.awt.*;
 
@@ -12,15 +12,14 @@ public class ClydeGhost extends Ghost {
 
     @Override
     protected void setDefaultValues() {
-        entityX = gp.tileSize * 8;
-        entityY = gp.tileSize * 9;
-        speed = 2;
+        entityX = gp.tileSize * 15;
+        entityY = gp.tileSize * 10;
+        speed = 1;
         direction = "left";
 
         state = "Scatter";
         scatterModeTarget = new Point(2 * gp.tileSize, (gp.maxScreenCol - 2) * gp.tileSize);
-        eatenModeTarget = new Point(entityX, entityY);
-        target = scatterModeTarget;
+        target = eatenModeTarget;
     }
 
     @Override

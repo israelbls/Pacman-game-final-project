@@ -1,5 +1,8 @@
 package main;
 
+import main.panels.GamePanel;
+import main.panels.MenuPanel;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -15,7 +18,7 @@ public class Main {
 
         // Set the window icon
         try {
-            Image image = ImageIO.read(new File("C:/Users/User/IdeaProjects/Pacman game - final project/src/assets/images/Pacman_icon.png"));
+            Image image = ImageIO.read(new File("src/assets/images/Pacman_icon.png"));
             window.setIconImage(image);
         } catch (IOException e) {
             e.printStackTrace();

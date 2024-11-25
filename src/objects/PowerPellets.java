@@ -1,6 +1,6 @@
 package objects;
 
-import main.GamePanel;
+import main.panels.GamePanel;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -25,10 +25,10 @@ public class PowerPellets extends GameObject {
     }
 
     private void initializeCoinsPositions() throws IOException {
-        positions[1][17] = "PowerPellets";
-        positions[17][1] = "PowerPellets";
+        positions[1][23] = "PowerPellets";
+        positions[23][1] = "PowerPellets";
         positions[1][1] = "PowerPellets";
-        positions[17][17] = "PowerPellets";
+        positions[23][23] = "PowerPellets";
     }
 
     public void draw(Graphics2D g2d) {

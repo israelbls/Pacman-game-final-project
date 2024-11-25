@@ -1,17 +1,16 @@
 package entitys.ghosts;
 
-import main.GamePanel;
+import main.panels.GamePanel;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GhostsManager {
-    private GamePanel gp;
     public final List<Ghost> ghosts;
 
     public GhostsManager(GamePanel gp) {
-        this.gp = gp;
         ghosts = new ArrayList<>();
         ghosts.add(new BlinkyGhost(gp));
         ghosts.add(new PinkyGhost(gp));
@@ -19,7 +18,7 @@ public class GhostsManager {
         ghosts.add(new ClydeGhost(gp));
     }
 
-    public void update() {
+    public void update() throws IOException {
         for (Ghost ghost : ghosts) {
             ghost.update();
         }
@@ -27,7 +26,7 @@ public class GhostsManager {
 
     public void frightened() {
         for (Ghost ghost : ghosts) {
-            ghost.enterMode("Frightened");
+            if (!ghost.state.equals("Eaten"))ghost.enterMode("Frightened");
             ghost.timeCounter = 0;
         }
     }
@@ -41,6 +40,7 @@ public class GhostsManager {
     public void resetAllGhosts() {
         for (Ghost ghost : ghosts) {
             ghost.resetPosition();
+            ghost.inHome = true;
         }
     }
 }

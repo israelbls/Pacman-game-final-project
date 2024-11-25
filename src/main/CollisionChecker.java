@@ -1,11 +1,10 @@
 package main;
 
 import entitys.Entity;
-import entitys.ghosts.GhostsManager;
-import objects.ObjectManager;
+import main.panels.GamePanel;
 
-import java.awt.*;
 import java.awt.Point;
+import java.io.IOException;
 
 public class CollisionChecker {
     GamePanel gp;
@@ -76,7 +75,7 @@ public class CollisionChecker {
         }
     }
 
-    public void checkObject(Entity entity, String[][] positions) {
+    public void checkObject(Entity entity, String[][] positions) throws IOException {
         int entityCol = entity.entityX / gp.tileSize;
         int entityRow = entity.entityY / gp.tileSize;
 
@@ -92,7 +91,7 @@ public class CollisionChecker {
         }
     }
 
-    public void handleObjectCollision(String objName, int row, int col, String[][] positions) {
+    public void handleObjectCollision(String objName, int row, int col, String[][] positions) throws IOException {
         switch (objName) {
             case "Coin":
                 System.out.println("coin collected at row:" + row + " col:" + col);
@@ -100,7 +99,7 @@ public class CollisionChecker {
                 positions[row][col] = null;
                 gp.player.points += 10;
                 coins--;
-                if (coins == 0) gp.player.win = true;
+                if (coins == 0) gp.player.nextLevel();
                 break;
             case "Cherry":
                 System.out.println("Cherry collected at row:" + row + " col:" + col);

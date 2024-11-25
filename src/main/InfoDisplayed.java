@@ -1,5 +1,7 @@
 package main;
 
+import main.panels.GamePanel;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -35,7 +37,7 @@ public class InfoDisplayed {
         String pointsText = String.format("%06d", gp.player.points);
         g2d.drawString(pointsText, scoreDrawPosition, 45);
 
-        int highScoreDrawPosition = gp.windowWidth - gp.leftRightMargin - gp.tileSize * 5;
+        int highScoreDrawPosition = gp.windowWidth - gp.leftRightMargin - gp.tileSize * 7;
         // Display "HIGH SCORE" text
         g2d.drawString("HIGH SCORE", highScoreDrawPosition, 25);
         // Display high score number below
@@ -52,7 +54,7 @@ public class InfoDisplayed {
     private Font customFont() {
         Font customFont;
         try {
-            customFont = Font.createFont(Font.TRUETYPE_FONT, new File("C:\\Users\\User\\IdeaProjects\\Pacman game - final project\\src\\assets\\fonts\\ARCADE_I.TTF")).deriveFont(16f);
+            customFont = Font.createFont(Font.TRUETYPE_FONT, new File("src/assets/fonts/ARCADE_I.TTF")).deriveFont(16f);
         } catch (FontFormatException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -69,7 +71,7 @@ public class InfoDisplayed {
     }
 
     public void draw(Graphics2D g2d) {
-        drawPlayerData(g2d);
+        if(!gp.inPlayBackMode) drawPlayerData(g2d);
         displayText(g2d);
     }
 }

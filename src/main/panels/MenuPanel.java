@@ -1,4 +1,4 @@
-package main;
+package main.panels;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,6 +8,12 @@ import java.io.IOException;
 public class MenuPanel extends JPanel {
     private final GamePanel gamePanel;
     private final JFrame parentFrame;
+    private JButton startButton;
+    private JButton highScoresButton;
+    private JButton playbackButton;
+    private JButton instructionsButton;
+    private JButton aboutButton;
+    private JButton exitButton;
 
     public MenuPanel(GamePanel gamePanel, JFrame parentFrame) {
         this.gamePanel = gamePanel;
@@ -23,28 +29,33 @@ public class MenuPanel extends JPanel {
         gbc.insets = new Insets(10, 0, 10, 0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JButton startButton = createButton("Start Game");
+        startButton = createButton("Start Game");
         startButton.setBackground(Color.orange);
 
-        JButton playbackButton = createButton("Saved Games");
+        highScoresButton = createButton("High Scores");
+        highScoresButton.setBackground(Color.magenta);
+
+        playbackButton = createButton("Saved Games");
         playbackButton.setBackground(Color.yellow);
 
-        JButton instructionsButton = createButton("Instructions");
+        instructionsButton = createButton("Instructions");
         instructionsButton.setBackground(Color.pink);
 
-        JButton aboutButton = createButton("About");
+        aboutButton = createButton("About");
         aboutButton.setBackground(Color.cyan);
 
-        JButton exitButton = createButton("Exit");
+        exitButton = createButton("Exit");
         exitButton.setBackground(Color.red);
 
-        startButton.addActionListener(e -> startGame());
-        playbackButton.addActionListener(e -> showSavedGames());
-        instructionsButton.addActionListener(e -> showInstructions());
-        aboutButton.addActionListener(e -> showAbout());
-        exitButton.addActionListener(e -> System.exit(0));
+        startButton.addActionListener(_ -> startGame());
+        highScoresButton.addActionListener(_ -> showHighScores());
+        playbackButton.addActionListener(_ -> showSavedGames());
+        instructionsButton.addActionListener(_ -> showInstructions());
+        aboutButton.addActionListener(_ -> showAbout());
+        exitButton.addActionListener(_ -> System.exit(0));
 
         add(startButton, gbc);
+        add(highScoresButton, gbc);
         add(playbackButton, gbc);
         add(instructionsButton, gbc);
         add(aboutButton, gbc);
@@ -60,10 +71,10 @@ public class MenuPanel extends JPanel {
         return button;
     }
 
-    private Font customFont() {
+    public static Font customFont() {
         Font customFont;
         try {
-            customFont = Font.createFont(Font.TRUETYPE_FONT, new File("C:\\Users\\User\\IdeaProjects\\Pacman game - final project\\src\\assets\\fonts\\ARCADE_I.TTF")).deriveFont(24f);
+            customFont = Font.createFont(Font.TRUETYPE_FONT, new File("src/assets/fonts/ARCADE_I.TTF")).deriveFont(24f);
         } catch (FontFormatException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -76,6 +87,7 @@ public class MenuPanel extends JPanel {
 
         // Set the game panel as the content
         parentFrame.setContentPane(gamePanel);
+        gamePanel.setParentFrame(parentFrame);
 
         // Start the game and refresh the frame
         gamePanel.startGameThread();
@@ -84,8 +96,16 @@ public class MenuPanel extends JPanel {
         gamePanel.requestFocusInWindow();
     }
 
+    private void showHighScores() {
+        parentFrame.getContentPane().removeAll();
+        parentFrame.add(new HighScoresPanel(gamePanel, parentFrame));
+        parentFrame.revalidate();
+        parentFrame.repaint();
+    }
+
     private void showSavedGames() {
         parentFrame.getContentPane().removeAll();
+        gamePanel.setParentFrame(parentFrame);
         parentFrame.add(new SavedGamesPanel(gamePanel, parentFrame));
         parentFrame.revalidate();
         parentFrame.repaint();
@@ -101,7 +121,7 @@ public class MenuPanel extends JPanel {
     }
 
     private void showAbout() {
-        parentFrame.getContentPane().remove(this);
+        parentFrame.getContentPane().removeAll();
         AboutPanel aboutPanel = new AboutPanel(gamePanel, parentFrame, this);
         parentFrame.getContentPane().add(aboutPanel);
         parentFrame.revalidate();

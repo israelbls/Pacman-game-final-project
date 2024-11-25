@@ -1,4 +1,4 @@
-package main;
+package main.panels;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,7 +33,7 @@ public class SavedGamesPanel extends JPanel {
 
         JButton backButton = new JButton("Back to Menu");
         backButton.setBackground(Color.RED);
-        backButton.addActionListener(e -> returnToMenu());
+        backButton.addActionListener(_ -> returnToMenu());
         add(backButton, BorderLayout.SOUTH);
 
         loadSavedGames();
@@ -71,11 +71,11 @@ public class SavedGamesPanel extends JPanel {
 
         JButton playButton = new JButton("Play");
         playButton.setBackground(Color.GREEN);
-        playButton.addActionListener(e -> loadGame(game));
+        playButton.addActionListener(_ -> loadGame(game));
 
         JButton deleteButton = new JButton("Delete");
         deleteButton.setBackground(Color.RED);
-        deleteButton.addActionListener(e -> deleteGame(game));
+        deleteButton.addActionListener(_ -> deleteGame(game));
 
         panel.add(nameLabel);
         panel.add(playButton);
@@ -87,6 +87,7 @@ public class SavedGamesPanel extends JPanel {
     private void loadGame(File game) {
         gamePanel.gameRecorder.loadRecording(game);
         gamePanel.inPlayBackMode = true;
+        gamePanel.addPlaybackSlider();
         parentFrame.getContentPane().removeAll();
         parentFrame.setContentPane(gamePanel);
         parentFrame.revalidate();

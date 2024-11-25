@@ -1,6 +1,6 @@
 package objects;
 
-import main.GamePanel;
+import main.panels.GamePanel;
 
 import java.awt.*;
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class ObjectManager {
         fruit.draw(g2);
     }
 
-    public void update() {
+    public void update() throws IOException {
         if (gp.inPlayBackMode) {
             String frame = gp.gameRecorder.getCurrentFrame(gp.frameCounter);
             fruit.playBackMode(frame);

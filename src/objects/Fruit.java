@@ -1,6 +1,6 @@
 package objects;
 
-import main.GamePanel;
+import main.panels.GamePanel;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -118,7 +118,25 @@ public class Fruit extends GameObject {
 
     private boolean isValidPosition(int row, int col) {
         // Check if position is empty and not blocked by walls or other objects
-        return positions[row][col] == null && !gp.tileManager.tiles[gp.tileManager.mapTileNum[row][col]].collision;
+        return positions[row][col] == null && !gp.tileManager.tiles[gp.tileManager.mapTileNum[row][col]].collision
+                && !isEmptyPosition(row, col);
+    }
+
+    private boolean isEmptyPosition(int x, int y) {
+        int[][] empty = {
+                {1,23},{23,1},{1,1},{23,23},
+                {12,0},{12,1},{12,2},{12,3},{12,21},{12,22},{12,23},{12,24},
+                {8,0},{8,1},{8,2},{8,3},{8,21},{8,22},{8,23},{8,24},
+                {10,9},{10,10},{10,11},{10,12},{10,13},{10,14},{10,15},{9,12},
+                {14,12},{18,12},{19,12}
+        };
+        
+        for (int[] pos : empty) {
+            if (pos[0] == x && pos[1] == y) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void deleteFruit(int index) {

@@ -1,7 +1,7 @@
 package entitys.ghosts;
 
 import entitys.Entity;
-import main.GamePanel;
+import main.panels.GamePanel;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -26,6 +26,8 @@ public abstract class Ghost extends Entity {
     public BufferedImage frighten1;
     BufferedImage frighten2;
 
+    boolean inHome;
+
     protected Point target;
     public Point scatterModeTarget;
     protected Point eatenModeTarget;
@@ -41,6 +43,9 @@ public abstract class Ghost extends Entity {
         solidArea.y = 2;
         solidArea.height = 28;
         solidArea.width = 28;
+
+        eatenModeTarget = new Point(12 * gp.tileSize, 9 * gp.tileSize);
+        inHome = true;
 
         setDefaultValues();
         getGhostImage();
@@ -81,7 +86,7 @@ public abstract class Ghost extends Entity {
     }
 
 
-    public void update() {
+    public void update() throws IOException {
         modeControl();
 
         // First get the new direction based on current state and target
@@ -92,27 +97,33 @@ public abstract class Ghost extends Entity {
             direction = newDirection;
         }
 
-        switch (direction) {
-            case "up":
-                entityY -= speed;
-                break;
-            case "down":
-                entityY += speed;
-                break;
-            case "left":
-                entityX -= speed;
-                // Handle screen wrapping for left side
-                if (entityX + solidArea.x < 0) {
-                    entityX = gp.screenWidth - gp.tileSize;
-                }
-                break;
-            case "right":
-                entityX += speed;
-                // Handle screen wrapping for right side
-                if (entityX + gp.tileSize > gp.screenWidth) {
-                    entityX = 0;
-                }
-                break;
+        if (!isPlayback() || !state.equals("Frightened")) {
+            switch (direction) {
+                case "up":
+                    entityY -= speed;
+                    break;
+                case "down":
+                    entityY += speed;
+                    break;
+                case "left":
+                    entityX -= speed;
+                    // Handle screen wrapping for left side
+                    if (entityX + solidArea.x < 0) {
+                        entityX = gp.screenWidth - gp.tileSize;
+                    }
+                    break;
+                case "right":
+                    entityX += speed;
+                    // Handle screen wrapping for right side
+                    if (entityX + gp.tileSize > gp.screenWidth) {
+                        entityX = 0;
+                    }
+                    break;
+            }
+        }else {
+            int[] position = locationInPlaybackMode();
+            entityX = position[0];
+            entityY = position[1];
         }
 
         // Animation frame counter
@@ -131,6 +142,7 @@ public abstract class Ghost extends Entity {
     }
 
     public Point getTarget() {
+        if (inHome)return inHomeTarget(ghostName);
         return switch (state) {
             case "Scatter" -> scatterModeTarget;
             case "Chase" -> getChaseModeTarget();
@@ -140,52 +152,40 @@ public abstract class Ghost extends Entity {
         };
     }
 
-    protected String getDirection() {
+    protected String getDirection() throws IOException {
         if (!isSnappedToGrid()) return direction;
         Random random = new Random();
         String[] availableDirections = getAvailableDirections(direction);
-        if (availableDirections.length == 0) return direction;
+        if (availableDirections.length == 0) return getOppositeDirection(direction);
         else if (availableDirections.length < 2) return availableDirections[0];
 
         target = getTarget();
         return switch (state) {
             case "Scatter", "Chase", "Eaten" -> bestDirection(target, availableDirections);
-            case "Frightened" -> isPlayback() ? playbackMode()
+            case "Frightened" -> isPlayback() ? directionInPlaybackMode()
                     : availableDirections[random.nextInt(availableDirections.length)];
             default -> "";
         };
     }
 
-    private String playbackMode() {
+    private String ghostTab() throws IOException {
         String frame = gp.gameRecorder.getCurrentFrame(gp.frameCounter);
-        String recordedDirection = switch (ghostName) {
+        return switch (ghostName) {
             case "blinky" -> frame.split("\\|")[1];
             case "pinky" -> frame.split("\\|")[2];
             case "inky" -> frame.split("\\|")[3];
             case "clyde" -> frame.split("\\|")[4];
             default -> null;
         };
-        
-        // If recorded direction is NA or null, use default behavior
-        if (recordedDirection == null || recordedDirection.equals("NA")) {
-            String[] availableDirections = getAvailableDirections(direction);
-            if (availableDirections.length == 0) return direction;
-            Random random = new Random();
-            return availableDirections[random.nextInt(availableDirections.length)];
-        }
-        
-        // Check if recorded direction is available
-        String[] availableDirections = getAvailableDirections(direction);
-        for (String dir : availableDirections) {
-            if (dir.equals(recordedDirection)) {
-                return recordedDirection;
-            }
-        }
-        
-        // If recorded direction is not available, use default behavior
-        if (availableDirections.length == 0) return direction;
-        Random random = new Random();
-        return availableDirections[random.nextInt(availableDirections.length)];
+    }
+
+    private String directionInPlaybackMode() throws IOException {
+        return Objects.requireNonNull(ghostTab()).split("@")[0];
+    }
+
+    private int[] locationInPlaybackMode() throws IOException {
+        String location = Objects.requireNonNull(ghostTab()).split("@")[1];
+        return new int[]{Integer.parseInt(location.split("#")[0]), Integer.parseInt(location.split("#")[1])};
     }
 
     public boolean isSnappedToGrid() {
@@ -223,6 +223,15 @@ public abstract class Ghost extends Entity {
         };
     }
 
+    private Point inHomeTarget(String ghostName){
+        System.out.println("in home - "+inHome + " " + ghostName);
+        return switch (ghostName){
+            case "blinky", "inky" -> new Point(14 * gp.tileSize, 8 * gp.tileSize);
+            case "pinky", "clyde" -> new Point(10 * gp.tileSize, 8 * gp.tileSize);
+            default -> throw new IllegalStateException("Unexpected value: " + ghostName);
+        };
+    }
+
     protected String[] getAvailableDirections(String direction) {
         List<String> available = new ArrayList<>();
         int col = entityX / gp.tileSize;
@@ -250,9 +259,12 @@ public abstract class Ghost extends Entity {
         timeCounter++;
         if (timeCounter > modeTimer) {
             timeCounter = 0;
-            if (state.equals("Frightened")) enterMode("Scatter");
-            if (state.equals("Scatter")) enterMode("Chase");
-            else enterMode("Scatter");
+            switch (state) {
+                case "Eaten" -> {break;}
+                case "Frightened" -> enterMode("Scatter");
+                case "Scatter" -> enterMode("Chase");
+                default -> enterMode("Scatter");
+            }
         }
 
         if (gp.collisionChecker.ghostHitsPlayer(this)) {
@@ -261,7 +273,7 @@ public abstract class Ghost extends Entity {
                 case "Scatter", "Chase":
                     if (!gp.player.dead) gp.player.life--;
                     gp.player.dead = true;
-                    gp.ghostsManager.resetAllGhosts();  // Reset all ghosts, not just this one
+                    gp.ghostsManager.resetAllGhosts();// Reset all ghosts, not just this one
                     if (gp.player.life == 0) gp.player.gameOver = true;
                     break;
                 case "Frightened":
@@ -272,13 +284,17 @@ public abstract class Ghost extends Entity {
             }
         }
 
+        if (inHome && gp.collisionChecker.ghostHitsHome(this, inHomeTarget(ghostName))) {
+            inHome = false;
+        }
         if (state.equals("Eaten") && gp.collisionChecker.ghostHitsHome(this, eatenModeTarget)) {
+            inHome = true;
             enterMode("Scatter");
         }
     }
 
     public void draw(Graphics2D g2d) {
-        BufferedImage image = null;
+        BufferedImage image;
         image = switch (state) {
 
             case "Scatter", "Chase" -> switch (direction) {

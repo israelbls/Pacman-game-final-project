@@ -1,9 +1,8 @@
 package entitys.ghosts;
 
-import main.GamePanel;
+import main.panels.GamePanel;
 
 import java.awt.*;
-import java.util.Random;
 
 public class PinkyGhost extends Ghost {
     public PinkyGhost(GamePanel gp) {
@@ -12,15 +11,14 @@ public class PinkyGhost extends Ghost {
 
     @Override
     protected void setDefaultValues() {
-        entityX = gp.tileSize * 9;
-        entityY = gp.tileSize * 8;
-        speed = 2;
+        entityX = gp.tileSize * 11;
+        entityY = gp.tileSize * 10;
+        speed = 1;
         direction = "down";
 
-        eatenModeTarget = new Point(entityX, entityY);
         state = "Scatter";
         scatterModeTarget = new Point(2 * gp.tileSize, 2 * gp.tileSize);
-        target = scatterModeTarget;
+        target = eatenModeTarget;
     }
 
     @Override

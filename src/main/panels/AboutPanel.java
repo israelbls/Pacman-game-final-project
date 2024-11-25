@@ -1,4 +1,4 @@
-package main;
+package main.panels;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -10,11 +10,11 @@ import java.io.IOException;
 public class AboutPanel extends JPanel implements KeyListener {
     private final GamePanel gamePanel;
     private final JFrame parentFrame;
-    private final MenuPanel menuPanel;
+    private MenuPanel menuPanel;
     private Image currentImage;
     private int currentImageIndex = 1;
     private final int totalImages = 11;
-    private final String imagePath = "C:/Users/User/IdeaProjects/Pacman game - final project/src/assets/images/presentation/";
+    private final String imagePath = "src/assets/images/presentation/";
     private final JLabel pageIndicator = new JLabel(String.format("%d/%d", currentImageIndex, totalImages));
 
 
@@ -124,7 +124,8 @@ public class AboutPanel extends JPanel implements KeyListener {
     }
 
     private void returnToMenu() {
-        parentFrame.getContentPane().remove(this);
+        parentFrame.getContentPane().removeAll();
+        menuPanel = new MenuPanel(gamePanel,parentFrame);
         parentFrame.getContentPane().add(menuPanel);
         parentFrame.revalidate();
         parentFrame.repaint();

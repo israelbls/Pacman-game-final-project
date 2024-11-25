@@ -1,9 +1,9 @@
 package entitys.ghosts;
 
-import main.GamePanel;
+import main.panels.GamePanel;
 
 import java.awt.*;
-import java.util.Random;
+
 
 public class BlinkyGhost extends Ghost {
 
@@ -14,14 +14,13 @@ public class BlinkyGhost extends Ghost {
     @Override
     protected void setDefaultValues() {
         entityX = gp.tileSize * 9;
-        entityY = gp.tileSize * 9;
-        speed = 2;
+        entityY = gp.tileSize * 10;
+        speed = 1;
         direction = "right";
 
-        eatenModeTarget = new Point(entityX, entityY);
         state = "Scatter";
         scatterModeTarget = new Point((gp.maxScreenRow - 2) * gp.tileSize, 2 * gp.tileSize);
-        target = scatterModeTarget;
+        target = eatenModeTarget;
     }
 
     @Override
