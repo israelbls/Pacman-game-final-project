@@ -54,7 +54,7 @@ public class InfoDisplayed {
     private Font customFont() {
         Font customFont;
         try {
-            customFont = Font.createFont(Font.TRUETYPE_FONT, new File("src/assets/fonts/ARCADE_I.TTF")).deriveFont(16f);
+            customFont = Font.createFont(Font.TRUETYPE_FONT, getClass().getResourceAsStream("/assets/fonts/ARCADE_I.TTF")).deriveFont(16f);
         } catch (FontFormatException | IOException e) {
             throw new RuntimeException(e);
         }

@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Main entry point for the Pacman game.
@@ -31,9 +32,14 @@ public class Main {
 
         // Set the window icon
         try {
-            Image image = ImageIO.read(new File("src/assets/images/Pacman_icon.png"));
+            InputStream imageStream = Main.class.getResourceAsStream("/assets/images/Pacman_icon.png");
+            if (imageStream == null) {
+                throw new RuntimeException("Image not found: /assets/images/Pacman_icon.png");
+            }
+            Image image = ImageIO.read(imageStream);
             window.setIconImage(image);
-        } catch (IOException e) {
+            System.out.println("Image loaded successfully!");
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

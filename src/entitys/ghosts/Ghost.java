@@ -131,22 +131,22 @@ public abstract class Ghost extends Entity {
 
     public void getGhostImage() {
         try {
-            up1 = ImageIO.read(new File("src/assets/images/ghosts/" + ghostName + "/up1.png"));
-            up2 = ImageIO.read(new File("src/assets/images/ghosts/" + ghostName + "/up2.png"));
-            down1 = ImageIO.read(new File("src/assets/images/ghosts/" + ghostName + "/down1.png"));
-            down2 = ImageIO.read(new File("src/assets/images/ghosts/" + ghostName + "/down2.png"));
-            right1 = ImageIO.read(new File("src/assets/images/ghosts/" + ghostName + "/right1.png"));
-            right2 = ImageIO.read(new File("src/assets/images/ghosts/" + ghostName + "/right2.png"));
-            left1 = ImageIO.read(new File("src/assets/images/ghosts/" + ghostName + "/left1.png"));
-            left2 = ImageIO.read(new File("src/assets/images/ghosts/" + ghostName + "/left2.png"));
+            up1 = ImageIO.read(getClass().getResourceAsStream("/assets/images/ghosts/" + ghostName + "/up1.png"));
+            up2 = ImageIO.read(getClass().getResourceAsStream("/assets/images/ghosts/" + ghostName + "/up2.png"));
+            down1 = ImageIO.read(getClass().getResourceAsStream("/assets/images/ghosts/" + ghostName + "/down1.png"));
+            down2 = ImageIO.read(getClass().getResourceAsStream("/assets/images/ghosts/" + ghostName + "/down2.png"));
+            right1 = ImageIO.read(getClass().getResourceAsStream("/assets/images/ghosts/" + ghostName + "/right1.png"));
+            right2 = ImageIO.read(getClass().getResourceAsStream("/assets/images/ghosts/" + ghostName + "/right2.png"));
+            left1 = ImageIO.read(getClass().getResourceAsStream("/assets/images/ghosts/" + ghostName + "/left1.png"));
+            left2 = ImageIO.read(getClass().getResourceAsStream("/assets/images/ghosts/" + ghostName + "/left2.png"));
 
-            eatenUp = ImageIO.read(new File("src/assets/images/ghosts/eatan/up.png"));
-            eatenDown = ImageIO.read(new File("src/assets/images/ghosts/eatan/down.png"));
-            eatenLeft = ImageIO.read(new File("src/assets/images/ghosts/eatan/left.png"));
-            eatenRight = ImageIO.read(new File("src/assets/images/ghosts/eatan/right.png"));
+            eatenUp = ImageIO.read(getClass().getResourceAsStream("/assets/images/ghosts/eatan/up.png"));
+            eatenDown = ImageIO.read(getClass().getResourceAsStream("/assets/images/ghosts/eatan/down.png"));
+            eatenLeft = ImageIO.read(getClass().getResourceAsStream("/assets/images/ghosts/eatan/left.png"));
+            eatenRight = ImageIO.read(getClass().getResourceAsStream("/assets/images/ghosts/eatan/right.png"));
 
-            frighten1 = ImageIO.read(new File("src/assets/images/ghosts/frightened/f1.png"));
-            frighten2 = ImageIO.read(new File("src/assets/images/ghosts/frightened/f2.png"));
+            frighten1 = ImageIO.read(getClass().getResourceAsStream("/assets/images/ghosts/frightened/f1.png"));
+            frighten2 = ImageIO.read(getClass().getResourceAsStream("/assets/images/ghosts/frightened/f2.png"));
         } catch (IOException _) {
             System.out.println("error loading ghost image");
         }

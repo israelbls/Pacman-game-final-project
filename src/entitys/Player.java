@@ -112,14 +112,14 @@ public class Player extends Entity {
      */
     public void getPlayerImage() {
         try {
-            up1 = ImageIO.read(new File("src/assets/images/pacman/pacman_up1.png"));
-            up2 = ImageIO.read(new File("src/assets/images/pacman/pacman_up2.png"));
-            down1 = ImageIO.read(new File("src/assets/images/pacman/pacman_down1.png"));
-            down2 = ImageIO.read(new File("src/assets/images/pacman/pacman_down2.png"));
-            right1 = ImageIO.read(new File("src/assets/images/pacman/pacman_right1.png"));
-            right2 = ImageIO.read(new File("src/assets/images/pacman/pacman_right2.png"));
-            left1 = ImageIO.read(new File("src/assets/images/pacman/pacman_left1.png"));
-            left2 = ImageIO.read(new File("src/assets/images/pacman/pacman_left2.png"));
+            up1 = ImageIO.read(getClass().getResourceAsStream("/assets/images/pacman/pacman_up1.png"));
+            up2 = ImageIO.read(getClass().getResourceAsStream("/assets/images/pacman/pacman_up2.png"));
+            down1 = ImageIO.read(getClass().getResourceAsStream("/assets/images/pacman/pacman_down1.png"));
+            down2 = ImageIO.read(getClass().getResourceAsStream("/assets/images/pacman/pacman_down2.png"));
+            right1 = ImageIO.read(getClass().getResourceAsStream("/assets/images/pacman/pacman_right1.png"));
+            right2 = ImageIO.read(getClass().getResourceAsStream("/assets/images/pacman/pacman_right2.png"));
+            left1 = ImageIO.read(getClass().getResourceAsStream("/assets/images/pacman/pacman_left1.png"));
+            left2 = ImageIO.read(getClass().getResourceAsStream("/assets/images/pacman/pacman_left2.png"));
         } catch (IOException _) {
             System.out.println("Error loading images");
         }

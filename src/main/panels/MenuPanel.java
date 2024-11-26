@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import javax.imageio.ImageIO;
 import javax.swing.border.LineBorder;
 
@@ -18,7 +19,7 @@ public class MenuPanel extends JPanel {
 
         // Load the background image
         try {
-            backgroundImage = ImageIO.read(new File("src/assets/images/menu background.png"));
+            backgroundImage = ImageIO.read(getClass().getResourceAsStream("/assets/images/menu background.png"));
         } catch (IOException e) {
             System.err.println("Error loading background image: " + e.getMessage());
         }
@@ -96,7 +97,7 @@ public class MenuPanel extends JPanel {
     public static Font customFont() {
         Font customFont;
         try {
-            customFont = Font.createFont(Font.TRUETYPE_FONT, new File("src/assets/fonts/ARCADE_I.TTF")).deriveFont(24f);
+            customFont = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(MenuPanel.class.getResourceAsStream("/assets/fonts/ARCADE_I.TTF"))).deriveFont(24f);
         } catch (FontFormatException | IOException e) {
             throw new RuntimeException(e);
         }

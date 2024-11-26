@@ -48,11 +48,11 @@ public class Fruit extends GameObject {
         random = new Random();
         name = "Fruit";
         try {
-            chery = ImageIO.read(new File("src/assets/images/fruits/chery.png"));
-            strawberry = ImageIO.read(new File("src/assets/images/fruits/Strawberry.png"));
-            apple = ImageIO.read(new File("src/assets/images/fruits/apple.png"));
-            lemon = ImageIO.read(new File("src/assets/images/fruits/lemon.png"));
-            grapes = ImageIO.read(new File("src/assets/images/fruits/grapes.png"));
+            chery = ImageIO.read(getClass().getResourceAsStream("/assets/images/fruits/chery.png"));
+            strawberry = ImageIO.read(getClass().getResourceAsStream("/assets/images/fruits/Strawberry.png"));
+            apple = ImageIO.read(getClass().getResourceAsStream("/assets/images/fruits/apple.png"));
+            lemon = ImageIO.read(getClass().getResourceAsStream("/assets/images/fruits/lemon.png"));
+            grapes = ImageIO.read(getClass().getResourceAsStream("/assets/images/fruits/grapes.png"));
             
             if (chery == null || strawberry == null || apple == null || lemon == null || grapes == null) {
                 System.out.println("Warning: Some fruit images failed to load!");
