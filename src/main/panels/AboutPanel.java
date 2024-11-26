@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class AboutPanel extends JPanel implements KeyListener {
     private final GamePanel gamePanel;
@@ -65,7 +66,7 @@ public class AboutPanel extends JPanel implements KeyListener {
     private void loadImage(int index) {
         try {
             String imageName = String.format("about_p%d.png", index);
-            File file = new File(imagePath + imageName);
+            InputStream file = getClass().getResourceAsStream(imagePath + imageName);
             Image originalImage = ImageIO.read(file);
 
             // Scale image to fit the panel while maintaining aspect ratio

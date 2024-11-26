@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 public class TileManager {
     GamePanel gp;
@@ -24,14 +25,14 @@ public class TileManager {
 
     public void loadTileImages() {
         try {
-            String path = "src/assets/images/walls/%s.png";
+            String path = "/assets/images/walls/%s.png";
 
             tiles[0] = new Tile();
-            tiles[0].image = ImageIO.read(new File(String.format(path, "redWall")));
+            tiles[0].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream(String.format(path, "redWall"))));
 
             for (int i = 1; i < 16; i++) {
                 tiles[i] = new Tile();
-                tiles[i].image = ImageIO.read(new File(String.format(path, "new_walls/" + i)));
+                tiles[i].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream(String.format(path, "new_walls/" + i))));
                 if (i > 1) tiles[i].collision = true;
             }
 

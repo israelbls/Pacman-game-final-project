@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
@@ -478,7 +479,7 @@ public class Player extends Entity {
      */
     public int getHighScore() {
         try {
-            File file = new File("high_score.txt");
+            InputStream file = getClass().getResourceAsStream("high_score.txt");
             Scanner scanner = new Scanner(file);
             int highScore = scanner.nextInt();
             scanner.close();
