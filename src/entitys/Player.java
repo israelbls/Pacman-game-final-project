@@ -42,7 +42,7 @@ public class Player extends Entity {
     public boolean win = false;
 
     // Game components
-    private HighScoreManager highScoreManager;
+    private final HighScoreManager highScoreManager;
     GamePanel gp;
     KeyEventsHandler keyEH;
 

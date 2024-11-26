@@ -13,27 +13,81 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
+/**
+ * Abstract base class for all ghost entities in the game.
+ * Implements common ghost behavior including movement, targeting, and state management.
+ */
 public abstract class Ghost extends Entity {
+    /**
+     * Reference to the game panel for accessing game state and functionality.
+     */
     public GamePanel gp;
+    
+    /**
+     * Timer for controlling ghost mode changes (e.g., switching between chase and scatter modes).
+     */
     protected int modeTimer = 600;
+    
+    /**
+     * Counter for tracking time in current mode.
+     */
     public int timeCounter = 0;
+    
+    /**
+     * Animation frame for frightened state (used for sprite animation).
+     */
     int frightenedPos = 1;
+    
+    /**
+     * Name identifier for the ghost (used for loading specific ghost images).
+     */
     protected String ghostName;
+    
+    /**
+     * Sprites for eaten state (displayed when the ghost is eaten by the player).
+     */
     public BufferedImage eatenUp;
     BufferedImage eatenDown;
     BufferedImage eatenLeft;
     BufferedImage eatenRight;
+    
+    /**
+     * Sprites for frightened state (displayed when the ghost is in frightened mode).
+     */
     public BufferedImage frighten1;
     BufferedImage frighten2;
 
+    /**
+     * Flag indicating if the ghost is in its home area.
+     */
     boolean inHome;
 
+    /**
+     * Current target point for the ghost (updated based on the ghost's state and mode).
+     */
     protected Point target;
+    
+    /**
+     * Target point during scatter mode (ghost moves to a specific location on the map).
+     */
     public Point scatterModeTarget;
+    
+    /**
+     * Target point when the ghost is eaten (ghost returns to its home area).
+     */
     protected Point eatenModeTarget;
 
+    /**
+     * Current ghost state (Chase, Scatter, Frightened, or Eaten).
+     */
     public String state;
 
+    /**
+     * Constructor for Ghost class.
+     * Initializes ghost properties and loads sprite images.
+     * @param gp GamePanel instance for game state access
+     * @param ghostName Name identifier for the ghost
+     */
     public Ghost(GamePanel gp, String ghostName) {
         this.gp = gp;
         this.ghostName = ghostName;
@@ -51,10 +105,23 @@ public abstract class Ghost extends Entity {
         getGhostImage();
     }
 
+    /**
+     * Sets default values for ghost position and state.
+     * Must be implemented by each ghost type.
+     */
     protected abstract void setDefaultValues();
 
+    /**
+     * Gets the target point for chase mode.
+     * Must be implemented by each ghost type.
+     * @return Point representing the chase mode target
+     */
     protected abstract Point getChaseModeTarget();
 
+    /**
+     * Resets ghost position and state to default values.
+     * Called when starting a new game or after player death.
+     */
     public void resetPosition() {
         setDefaultValues();
         state = "Scatter";  // Reset to default state
@@ -86,6 +153,11 @@ public abstract class Ghost extends Entity {
     }
 
 
+    /**
+     * Updates ghost state and position.
+     * Handles movement, mode changes, and interactions with the player.
+     * @throws IOException If there's an error during playback mode
+     */
     public void update() throws IOException {
         modeControl();
 
@@ -136,13 +208,21 @@ public abstract class Ghost extends Entity {
         }
     }
 
+    /**
+     * Changes ghost mode and updates direction.
+     * @param mode New mode to enter (Scatter/Chase/Frightened/Eaten)
+     */
     public void enterMode(String mode) {
         state = mode;
         direction = getOppositeDirection(direction);
     }
 
+    /**
+     * Gets current target point based on ghost state.
+     * @return Point representing current target location
+     */
     public Point getTarget() {
-        if (inHome)return inHomeTarget(ghostName);
+        if (inHome) return inHomeTarget(ghostName);
         return switch (state) {
             case "Scatter" -> scatterModeTarget;
             case "Chase" -> getChaseModeTarget();
@@ -152,6 +232,11 @@ public abstract class Ghost extends Entity {
         };
     }
 
+    /**
+     * Determines next direction based on current state and target.
+     * @return String representing next direction
+     * @throws IOException If there's an error during playback mode
+     */
     protected String getDirection() throws IOException {
         if (!isSnappedToGrid()) return direction;
         Random random = new Random();
@@ -168,6 +253,11 @@ public abstract class Ghost extends Entity {
         };
     }
 
+    /**
+     * Gets ghost data from current frame during playback.
+     * @return String containing ghost data from playback frame
+     * @throws IOException If there's an error reading frame data
+     */
     private String ghostTab() throws IOException {
         String frame = gp.gameRecorder.getCurrentFrame(gp.frameCounter);
         return switch (ghostName) {
@@ -179,15 +269,30 @@ public abstract class Ghost extends Entity {
         };
     }
 
+    /**
+     * Gets ghost direction during playback mode.
+     * @return String representing direction from playback data
+     * @throws IOException If there's an error during playback
+     */
     private String directionInPlaybackMode() throws IOException {
         return Objects.requireNonNull(ghostTab()).split("@")[0];
     }
 
+    /**
+     * Gets ghost location during playback mode.
+     * @return int array containing [x, y] coordinates
+     * @throws IOException If there's an error during playback
+     */
     private int[] locationInPlaybackMode() throws IOException {
         String location = Objects.requireNonNull(ghostTab()).split("@")[1];
         return new int[]{Integer.parseInt(location.split("#")[0]), Integer.parseInt(location.split("#")[1])};
     }
 
+    /**
+     * Checks if ghost is aligned with game grid.
+     * Used to determine when ghost can change direction.
+     * @return boolean indicating if ghost is on grid intersection
+     */
     public boolean isSnappedToGrid() {
         if (Objects.equals(direction, "NA")) {
             return false;
@@ -199,6 +304,15 @@ public abstract class Ghost extends Entity {
         };
     }
 
+    /**
+     * Determines best direction to reach target.
+     * Calculates distances to target from each available direction
+     * and chooses the direction that minimizes distance.
+     * 
+     * @param target Target point to reach
+     * @param availableDirections Array of possible directions
+     * @return String representing best direction
+     */
     protected String bestDirection(Point target, String[] availableDirections) {
         double minDistance = Double.MAX_VALUE;
         String bestDirection = availableDirections[0];
@@ -213,6 +327,14 @@ public abstract class Ghost extends Entity {
         return bestDirection;
     }
 
+    /**
+     * Gets point after moving in specified direction.
+     * Calculates new position based on current position and movement direction.
+     * 
+     * @param direction Direction to move
+     * @return Point representing new position
+     * @throws IllegalStateException if direction is invalid
+     */
     private Point getPoint(String direction) {
         return switch (direction) {
             case "up" -> new Point(entityX, entityY - speed);
@@ -223,6 +345,14 @@ public abstract class Ghost extends Entity {
         };
     }
 
+    /**
+     * Gets target point when ghost is in home area.
+     * Different ghosts have different home positions.
+     * 
+     * @param ghostName Name of ghost to get home target for
+     * @return Point representing home target position
+     * @throws IllegalStateException if ghost name is invalid
+     */
     private Point inHomeTarget(String ghostName){
         System.out.println("in home - "+inHome + " " + ghostName);
         return switch (ghostName){
@@ -232,6 +362,13 @@ public abstract class Ghost extends Entity {
         };
     }
 
+    /**
+     * Gets available directions excluding opposite of current direction.
+     * Checks for wall collisions in each direction.
+     * 
+     * @param direction Current direction
+     * @return Array of available directions
+     */
     protected String[] getAvailableDirections(String direction) {
         List<String> available = new ArrayList<>();
         int col = entityX / gp.tileSize;
@@ -245,6 +382,13 @@ public abstract class Ghost extends Entity {
         return available.toArray(new String[0]);
     }
 
+    /**
+     * Gets opposite direction.
+     * Used when ghost changes mode to reverse direction.
+     * 
+     * @param dir Current direction
+     * @return String representing opposite direction
+     */
     protected String getOppositeDirection(String dir) {
         return switch (dir) {
             case "up" -> "down";
@@ -255,6 +399,14 @@ public abstract class Ghost extends Entity {
         };
     }
 
+    /**
+     * Controls ghost mode changes and interactions.
+     * Handles:
+     * - Mode timing and transitions
+     * - Player collisions and scoring
+     * - Home area entry/exit
+     * - Ghost state changes
+     */
     public void modeControl() {
         timeCounter++;
         if (timeCounter > modeTimer) {
@@ -293,10 +445,18 @@ public abstract class Ghost extends Entity {
         }
     }
 
+    /**
+     * Draws ghost sprite based on current state and direction.
+     * Selects appropriate sprite based on:
+     * - Current state (Scatter/Chase/Frightened/Eaten)
+     * - Movement direction
+     * - Animation frame
+     * 
+     * @param g2d Graphics2D object for rendering
+     */
     public void draw(Graphics2D g2d) {
         BufferedImage image;
         image = switch (state) {
-
             case "Scatter", "Chase" -> switch (direction) {
                 case "up" -> positionNumber == 1 ? up1 : up2;
                 case "down" -> positionNumber == 1 ? down1 : down2;
@@ -323,6 +483,10 @@ public abstract class Ghost extends Entity {
         g2d.drawImage(image, screenX, screenY, gp.tileSize, gp.tileSize, null);
     }
 
+    /**
+     * Checks if game is in playback mode.
+     * @return boolean indicating if game is in playback mode
+     */
     private boolean isPlayback() {
         return gp.inPlayBackMode;
     }

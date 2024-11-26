@@ -9,7 +9,7 @@ import javax.sound.sampled.FloatControl;
 public class SoundManager {
     private Clip musicClip;
     private Clip[] seClips;
-    private URL[] soundURL = new URL[30];
+    private final URL[] soundURL = new URL[30];
 
     public SoundManager() {
         this.soundURL[0] = this.getClass().getResource("/assets/sound/Pac-man.wav");

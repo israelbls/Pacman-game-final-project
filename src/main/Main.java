@@ -9,7 +9,20 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
+/**
+ * Main entry point for the Pacman game.
+ * Sets up the game window, initializes the game and menu panels,
+ * and configures basic window properties.
+ */
 public class Main {
+    /**
+     * Main method that starts the Pacman game.
+     * Creates and configures the main game window, sets up the game
+     * and menu panels, and displays the window to the user.
+     *
+     * @param args Command line arguments (not used)
+     * @throws IOException If game resources cannot be loaded
+     */
     public static void main(String[] args) throws IOException {
         // Create the JFrame window
         JFrame window = new JFrame();
@@ -26,7 +39,7 @@ public class Main {
 
         // Create the GamePanel and add it to the window
         GamePanel panel = new GamePanel();
-        MenuPanel menu = new MenuPanel(panel,window);
+        MenuPanel menu = new MenuPanel(panel, window);
         window.add(menu);
         window.pack();
 

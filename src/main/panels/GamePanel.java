@@ -151,7 +151,11 @@ public class GamePanel extends JPanel implements Runnable {
 
     /**
      * Starts the game thread if it's not already running.
-     * Initializes game music and requests keyboard focus.
+     * This method:
+     * - Sets the running flag
+     * - Creates and starts a new game thread
+     * - Initializes game music
+     * - Ensures keyboard focus is on the game panel
      */
     public void startGameThread() {
         if (!running) {
@@ -166,6 +170,12 @@ public class GamePanel extends JPanel implements Runnable {
     /**
      * Main game loop implementation.
      * Handles timing, updates, and rendering of the game.
+     * This method:
+     * - Maintains consistent game speed using delta timing
+     * - Processes game updates when not paused
+     * - Handles input regardless of pause state
+     * - Manages frame rendering
+     * The loop continues until the game thread is interrupted or an error occurs.
      */
     @Override
     public void run() {
@@ -206,6 +216,9 @@ public class GamePanel extends JPanel implements Runnable {
 
     /**
      * Updates game state, including time display and all game entities.
+     * This method is called every frame when the game is not paused.
+     * It updates the frame counter, game speed, time display, and all game entities.
+     * If not in playback mode, it also records the current frame.
      *
      * @throws IOException If there's an error during game recording
      */
@@ -228,6 +241,10 @@ public class GamePanel extends JPanel implements Runnable {
 
     /**
      * Handles user input for game control (pause and menu navigation).
+     * This method processes key events for:
+     * - Pause/Resume game (using pause key)
+     * - Return to menu (using escape key)
+     * The method is called every frame regardless of pause state.
      *
      * @throws IOException If there's an error during menu transition
      */
@@ -245,7 +262,12 @@ public class GamePanel extends JPanel implements Runnable {
     }
 
     /**
-     * Resets the game state, including all game entities and input handlers.
+     * Resets the game state to its initial configuration.
+     * This includes:
+     * - Resetting pause state
+     * - Creating new input handler
+     * - Reinitializing all game components (player, ghosts, objects, etc.)
+     * - Restoring keyboard focus
      */
     public void reset() {
         isPaused = false;

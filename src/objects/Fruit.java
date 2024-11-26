@@ -10,21 +10,35 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 
+/**
+ * Represents bonus fruits that appear during gameplay.
+ * Fruits spawn randomly on the map, remain for a limited duration,
+ * and provide bonus points when collected by Pacman.
+ * The duration and spawn delay of fruits decrease as the player's score increases,
+ * making the game more challenging over time.
+ */
 public class Fruit extends GameObject {
-    public String[][] positions;
-    BufferedImage chery, strawberry, apple, grapes, lemon;
-    private int[] fruitTimers;  // Track frames for each fruit
-    private int[] fruitDurations;  // How long each fruit should stay
+    public String[][] positions;//Grid positions of active fruits
+    BufferedImage chery, strawberry, apple, grapes, lemon;//Fruit images
+    private final int[] fruitTimers;  // Track frames for each fruit
+    private final int[] fruitDurations;  // How long each fruit should stay
     private int spawnTimer;  // Timer for next fruit spawn
     private int spawnDelay;  // Random delay before next fruit spawn
-    private boolean[] fruitActive; // Track if each fruit is currently active
+    private final boolean[] fruitActive; // Track if each fruit is currently active
     private final int BASE_MIN_DURATION = 300;  // 5 seconds (60 frames per second)
     private final int BASE_MAX_DURATION = 600;  // 10 seconds
     private final int BASE_MIN_SPAWN_DELAY = 180;  // 3 seconds
     private final int BASE_MAX_SPAWN_DELAY = 420;  // 7 seconds
     public final String[] fruitTypes = {"Cherry", "Strawberry", "Apple", "Lemon", "Grapes"};
-    private Random random;
+    private final Random random;
 
+    /**
+     * Constructs a new Fruit manager.
+     * Initializes fruit images, timers, and spawn system.
+     *
+     * @param gp GamePanel instance for game state access
+     * @throws IOException If fruit images cannot be loaded
+     */
     public Fruit(GamePanel gp) throws IOException {
         super(gp);
         positions = new String[gp.maxScreenRow][gp.maxScreenCol];
@@ -56,6 +70,12 @@ public class Fruit extends GameObject {
         }
     }
 
+    /**
+     * Calculates random duration for fruit to remain active.
+     * Duration decreases as player's score increases.
+     *
+     * @return Number of frames the fruit should remain active
+     */
     private int getRandomDuration() {
         int scoreReduction = gp.player.points / 1000;  // Reduce duration as score increases
         int minDuration = Math.max(BASE_MIN_DURATION - (scoreReduction * 30), 120);  // Minimum 2 seconds
@@ -63,6 +83,12 @@ public class Fruit extends GameObject {
         return random.nextInt(maxDuration - minDuration + 1) + minDuration;
     }
 
+    /**
+     * Calculates random delay before spawning next fruit.
+     * Delay decreases as player's score increases.
+     *
+     * @return Number of frames to wait before spawning next fruit
+     */
     private int getRandomSpawnDelay() {
         int scoreReduction = (gp.player != null) ? gp.player.points / 1000 : 0;  // Reduce delay as score increases
         int minDelay = Math.max(BASE_MIN_SPAWN_DELAY - (scoreReduction * 20), 60);  // Minimum 1 second
@@ -70,6 +96,10 @@ public class Fruit extends GameObject {
         return random.nextInt(maxDelay - minDelay + 1) + minDelay;
     }
 
+    /**
+     * Updates fruit states each frame.
+     * Handles fruit spawning, timing, and removal.
+     */
     public void update() {
         spawnTimer++;
         
@@ -89,11 +119,20 @@ public class Fruit extends GameObject {
         }
     }
 
+    /**
+     * Checks if any fruit is currently active.
+     *
+     * @return true if at least one fruit is active, false otherwise
+     */
     private boolean isAnyFruitActive() {
         for (boolean active : fruitActive) if (active) return true;
         return false;
     }
 
+    /**
+     * Spawns a new random fruit at a valid position.
+     * Handles fruit type selection, position finding, and activation.
+     */
     private void spawnNewFruit() {
         // Select random fruit type
         int fruitIndex = random.nextInt(fruitTypes.length);
@@ -116,12 +155,27 @@ public class Fruit extends GameObject {
         spawnDelay = getRandomSpawnDelay();
     }
 
+    /**
+     * Checks if a position is valid for fruit placement.
+     * Position must be empty and not blocked by walls or other objects.
+     *
+     * @param row Row index to check
+     * @param col Column index to check
+     * @return true if position is valid for fruit placement
+     */
     private boolean isValidPosition(int row, int col) {
-        // Check if position is empty and not blocked by walls or other objects
         return positions[row][col] == null && !gp.tileManager.tiles[gp.tileManager.mapTileNum[row][col]].collision
                 && !isEmptyPosition(row, col);
     }
 
+    /**
+     * Checks if a position is in the list of empty positions.
+     * Empty positions are specific coordinates where fruits should not spawn.
+     *
+     * @param x Row coordinate to check
+     * @param y Column coordinate to check
+     * @return true if position is in empty list
+     */
     private boolean isEmptyPosition(int x, int y) {
         int[][] empty = {
                 {1,23},{23,1},{1,1},{23,23},
@@ -139,6 +193,12 @@ public class Fruit extends GameObject {
         return false;
     }
 
+    /**
+     * Removes a fruit from the game.
+     * Deactivates the fruit and clears its position.
+     *
+     * @param index Index of fruit type to delete
+     */
     public void deleteFruit(int index) {
         if (index >= 0 && index < fruitTypes.length) {
             fruitActive[index] = false;
@@ -154,12 +214,24 @@ public class Fruit extends GameObject {
         }
     }
 
+    /**
+     * Gets the index of a fruit type by name.
+     *
+     * @param fruitName Name of fruit to find
+     * @return Index of fruit type, or -1 if not found
+     */
     public int getFruitIndex(String fruitName) {
         for (int i = 0; i < fruitTypes.length; i++)
             if (fruitTypes[i].equals(fruitName)) return i;
         return -1;  // Return -1 if fruit not found
     }
 
+    /**
+     * Updates fruit positions for playback mode.
+     * Parses frame data to reconstruct fruit positions.
+     *
+     * @param frame String containing fruit position data
+     */
     public void playBackMode(String frame){
         String[] cells = frame.split("\\|");
         String[] fruits = Arrays.copyOfRange(cells, 5, cells.length);
@@ -177,6 +249,12 @@ public class Fruit extends GameObject {
         }
     }
 
+    /**
+     * Draws all active fruits on the game screen.
+     * Each fruit type uses its corresponding sprite image.
+     *
+     * @param g2d Graphics2D object for rendering
+     */
     public void draw(Graphics2D g2d) {
         for (int row = 0; row < positions.length; row++) {
             for (int col = 0; col < positions[row].length; col++) {

@@ -12,7 +12,7 @@ public class AboutPanel extends JPanel implements KeyListener {
     private final JFrame parentFrame;
     private MenuPanel menuPanel;
     private Image currentImage;
-    private int currentImageIndex = 1;
+    private int currentImageIndex = 0;
     private final int totalImages = 11;
     private final String imagePath = "src/assets/images/presentation/";
     private final JLabel pageIndicator = new JLabel(String.format("%d/%d", currentImageIndex, totalImages));

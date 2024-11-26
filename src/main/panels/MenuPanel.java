@@ -4,23 +4,27 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import javax.imageio.ImageIO;
+import javax.swing.border.LineBorder;
 
 public class MenuPanel extends JPanel {
     private final GamePanel gamePanel;
     private final JFrame parentFrame;
-    private JButton startButton;
-    private JButton highScoresButton;
-    private JButton playbackButton;
-    private JButton instructionsButton;
-    private JButton aboutButton;
-    private JButton exitButton;
+    private Image backgroundImage;
 
     public MenuPanel(GamePanel gamePanel, JFrame parentFrame) {
         this.gamePanel = gamePanel;
         this.parentFrame = parentFrame;
 
+        // Load the background image
+        try {
+            backgroundImage = ImageIO.read(new File("src/assets/images/menu background.png"));
+        } catch (IOException e) {
+            System.err.println("Error loading background image: " + e.getMessage());
+        }
+
         setPreferredSize(gamePanel.getPreferredSize());
-        setBackground(Color.BLACK);
+        setBackground(Color.BLACK); // Fallback color if image fails to load
 
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -29,22 +33,28 @@ public class MenuPanel extends JPanel {
         gbc.insets = new Insets(10, 0, 10, 0);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        startButton = createButton("Start Game");
+        gbc.weighty = 0;
+        gbc.insets = new Insets(100, 0, 0, 0);
+        add(Box.createVerticalStrut(1), gbc);
+
+        gbc.insets = new Insets(10, 0, 10, 0);
+
+        JButton startButton = createButton("Start Game");
         startButton.setBackground(Color.orange);
 
-        highScoresButton = createButton("High Scores");
+        JButton highScoresButton = createButton("High Scores");
         highScoresButton.setBackground(Color.magenta);
 
-        playbackButton = createButton("Saved Games");
+        JButton playbackButton = createButton("Saved Games");
         playbackButton.setBackground(Color.yellow);
 
-        instructionsButton = createButton("Instructions");
+        JButton instructionsButton = createButton("Instructions");
         instructionsButton.setBackground(Color.pink);
 
-        aboutButton = createButton("About");
+        JButton aboutButton = createButton("About");
         aboutButton.setBackground(Color.cyan);
 
-        exitButton = createButton("Exit");
+        JButton exitButton = createButton("Exit");
         exitButton.setBackground(Color.red);
 
         startButton.addActionListener(_ -> startGame());
@@ -60,12 +70,24 @@ public class MenuPanel extends JPanel {
         add(instructionsButton, gbc);
         add(aboutButton, gbc);
         add(exitButton, gbc);
+
+        setOpaque(true);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+        }
     }
 
     private JButton createButton(String text) {
         JButton button = new JButton(text);
         button.setPreferredSize(new Dimension(350, 70));
         button.setFont(customFont());
+        button.setBorder(new LineBorder(Color.white,5));
         button.setBackground(Color.BLUE);
         button.setForeground(Color.blue);
         return button;
@@ -82,14 +104,9 @@ public class MenuPanel extends JPanel {
     }
 
     private void startGame() {
-        // Remove all components first
         parentFrame.getContentPane().removeAll();
-
-        // Set the game panel as the content
         parentFrame.setContentPane(gamePanel);
         gamePanel.setParentFrame(parentFrame);
-
-        // Start the game and refresh the frame
         gamePanel.startGameThread();
         parentFrame.revalidate();
         parentFrame.repaint();
