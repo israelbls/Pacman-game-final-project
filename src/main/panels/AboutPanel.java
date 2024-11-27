@@ -15,7 +15,7 @@ public class AboutPanel extends JPanel implements KeyListener {
     private Image currentImage;
     private int currentImageIndex = 0;
     private final int totalImages = 11;
-    private final String imagePath = "src/assets/images/presentation/";
+    private final String imagePath = "/assets/images/presentation/";
     private final JLabel pageIndicator = new JLabel(String.format("%d/%d", currentImageIndex, totalImages));
 
 
