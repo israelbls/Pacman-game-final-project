@@ -163,7 +163,7 @@ public class GameRecorder {
      * @throws IOException If there's an error during menu transition
      */
     public String getCurrentFrame(int frameNumber) throws IOException {
-        if (frameNumber >= frames.size()) {
+        if (frameNumber >= frames.size() -1) {
             int choice = JOptionPane.showConfirmDialog(
                     gp, "Game ended do you want to watch again ?",
                     "Game ended", JOptionPane.YES_NO_OPTION

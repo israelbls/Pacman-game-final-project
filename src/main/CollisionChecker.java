@@ -99,7 +99,11 @@ public class CollisionChecker {
                 positions[row][col] = null;
                 gp.player.points += 10;
                 coins--;
-                if (coins == 0) gp.player.nextLevel();
+                System.out.println("coins:" + coins);
+                if (coins == 0) {
+                    gp.player.nextLevel();
+                    this.coins = gp.objectManager.coins.coins;
+                }
                 break;
             case "Cherry":
                 System.out.println("Cherry collected at row:" + row + " col:" + col);

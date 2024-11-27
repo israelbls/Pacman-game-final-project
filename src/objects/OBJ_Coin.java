@@ -13,7 +13,7 @@ import java.util.Objects;
  */
 public class OBJ_Coin extends GameObject {
     public String[][] positions;  // Grid positions of coins
-    public int coins = 0;        // Total number of coins in the game
+    public int coins;        // Total number of coins in the game
 
     /**
      * Constructs a new OBJ_Coin object.
@@ -26,6 +26,7 @@ public class OBJ_Coin extends GameObject {
         super(gp);
         positions = new String[gp.maxScreenCol][gp.maxScreenRow];
         name = "Coin";
+        coins = 0;
         try {
             image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/assets/images/objects/coin.png")));
             initializeCoinsPositions();
@@ -67,7 +68,7 @@ public class OBJ_Coin extends GameObject {
             positions[pos[0]][pos[1]] = null;
         }
 
-        coins -= 12;  // Adjust total coin count
+        coins -= empty.length;  // Adjust total coin count
     }
 
     /**

@@ -169,7 +169,7 @@ public abstract class Ghost extends Entity {
             direction = newDirection;
         }
 
-        if (!isPlayback() || !state.equals("Frightened")) {
+        if ((!isPlayback() || !state.equals("Frightened"))) {
             switch (direction) {
                 case "up":
                     entityY -= speed;
