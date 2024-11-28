@@ -75,5 +75,6 @@ The project includes several key components:
 - Game state management
 
 ---
+## Contact & Feedback
 
-Enjoy playing the classic Pacman game with modern features!
+For feedback and professional comments, please contact: [Email](mailto:israelbls12@gmail.com)
